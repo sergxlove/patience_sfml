@@ -1,5 +1,6 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
+#include <ctime>
 using namespace sf;
 using namespace std;
 class Card
@@ -18,7 +19,10 @@ private:
     float pozitionX;
     float pozitionY;
 };
-vector<Card> fieldArray();
+inline vector<Card> fieldArray();
+inline vector<Sprite> field_array_for_card(Texture* texture);
+inline vector<int> field_cols(vector<bool>* check, int size);
+inline vector<bool> field_check_array();
 enum masts
 {
     hearts,
@@ -33,8 +37,20 @@ enum colors
 };
 int main()
 {
-    RenderWindow window(VideoMode(800, 800), "Patience");
+    srand(time(NULL));
+    RenderWindow window(VideoMode(1500, 900), "Patience");
     vector<Card> arrayCard = fieldArray();
+    Image all_card;
+    all_card.loadFromFile("images/cards.png");
+    Texture texture_cards;
+    texture_cards.loadFromImage(all_card);
+    Sprite shop_spr;
+    shop_spr.setTexture(texture_cards);
+    shop_spr.setTextureRect(IntRect(2160, 20, 164, 230));
+    shop_spr.setPosition(50, 50);
+    shop_spr.setScale(0.8, 0.8);
+    vector<Sprite> slot_for_card = field_array_for_card(&texture_cards);
+    vector<bool> check_using = field_check_array();
     while (window.isOpen())
     {
         Event event;
@@ -44,6 +60,11 @@ int main()
                 window.close();
         }
         window.clear();
+        window.draw(shop_spr);
+        for (auto el : slot_for_card)
+        {
+            window.draw(el);
+        }
         window.display();
     }
     return 0;
@@ -82,7 +103,7 @@ void Card::setPozition(float pozitionX, float pozitionY)
     this->pozitionX = pozitionX;
     this->pozitionY = pozitionY;
 }
-vector<Card> fieldArray()
+inline vector<Card> fieldArray()
 {
     vector<Card> result;
     int totalIndex = 0;
@@ -121,5 +142,38 @@ vector<Card> fieldArray()
         }
         result.push_back(card);
     }
+    return result;
+}
+inline vector<Sprite> field_array_for_card(Texture *texture)
+{
+    vector<Sprite> result;
+    float pozitionX = 500.0;
+    float pozitionY = 50.0;
+    for (int i = 0;i < 4;i++)
+    {
+        Sprite card_spr;
+        card_spr.setTexture(*texture);
+        card_spr.setTextureRect(IntRect(2160, 250, 164, 230));
+        card_spr.setScale(0.8, 0.8);
+        card_spr.setPosition(pozitionX, pozitionY);
+        pozitionX += 170;
+        result.push_back(card_spr);
+    }
+    return result;
+}
+inline vector<bool> field_check_array()
+{
+    vector<bool> result;
+    result.reserve(52);
+    for (int i = 0;i < 52;i++)
+    {
+        result.push_back(false);
+    }
+    return result;
+}
+inline vector<int> field_cols(vector<bool>* check, int size)
+{
+    vector<int> result;
+
     return result;
 }
