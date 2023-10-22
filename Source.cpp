@@ -30,7 +30,8 @@ inline vector<Sprite> field_array_for_card(Texture* texture);
 inline vector<int> field_cols(vector<bool>* check, int size);
 inline vector<bool> field_check_array();
 inline vector<int> field_array_shop(vector<bool>* check);
-inline vector<Sprite> field_array_spriet(Texture* texture, vector<Card>* arrayCard);
+inline vector<Sprite> field_array_sprite(Texture* texture, vector<Card>* arrayCard);
+inline void draw_all_cols(RenderWindow* window, vector<Sprite> &sprite, vector<int>* v1, vector<int>* v2, vector<int>* v3, vector<int>* v4, vector<int>* v5, vector<int>* v6, vector<int>* v7);
 enum masts
 {
     hearts,
@@ -46,7 +47,7 @@ enum colors
 int main()
 {
     srand(time(NULL));
-    RenderWindow window(VideoMode(1500, 900), "Patience");
+    RenderWindow window(VideoMode(1600, 900), "Patience");
     vector<Card> arrayCard = fieldArray();
     Image all_card;
     all_card.loadFromFile("images/cards.png");
@@ -69,6 +70,7 @@ int main()
     vector<int> arr_shop = field_array_shop(&check_using);
     bool is_sprite_drag = false;
     Vector2f offset;
+    vector<Sprite> arr_sprites = field_array_sprite(&texture_cards, &arrayCard);
     while (window.isOpen())
     {
         Event event;
@@ -107,6 +109,7 @@ int main()
         {
             window.draw(el);
         }
+        draw_all_cols(&window, arr_sprites, &cols_v1, &cols_v2, &cols_v3, &cols_v4, &cols_v5, &cols_v6, &cols_v7);
         window.display();
     }
     return 0;
@@ -269,7 +272,7 @@ inline vector<int> field_array_shop(vector<bool>* check)
     }
     return result;
 }
-inline vector<Sprite> field_array_spriet(Texture* texture, vector<Card>* arrayCard)
+inline vector<Sprite> field_array_sprite(Texture* texture, vector<Card>* arrayCard)
 {
     vector<Sprite> result;
     result.reserve(52);
@@ -282,4 +285,63 @@ inline vector<Sprite> field_array_spriet(Texture* texture, vector<Card>* arrayCa
         result.push_back(sprite);
     }
     return result;
+}
+inline void draw_all_cols(RenderWindow* window, vector<Sprite> &sprite, vector<int>* v1, vector<int>* v2, vector<int>* v3, vector<int>* v4, vector<int>* v5, vector<int>* v6, vector<int>* v7)
+{
+    float total_x = 200.0f;
+    float total_y = 300.0f;
+    for (auto& el : *v1)
+    {
+        sprite[el].setPosition(total_x, total_y);
+        window->draw(sprite[el]);
+        total_y += 50;
+    }
+    total_x += 200.0f;
+    total_y = 300.0f;
+    for (auto& el : *v2)
+    {
+        sprite[el].setPosition(total_x, total_y);
+        window->draw(sprite[el]);
+        total_y += 50;
+    }
+    total_x += 200.0f;
+    total_y = 300.0f;
+    for (auto& el : *v3)
+    {
+        sprite[el].setPosition(total_x, total_y);
+        window->draw(sprite[el]);
+        total_y += 50;
+    }
+    total_x += 200.0f;
+    total_y = 300.0f;
+    for (auto& el : *v4)
+    {
+        sprite[el].setPosition(total_x, total_y);
+        window->draw(sprite[el]);
+        total_y += 50;
+    }
+    total_x += 200.0f;
+    total_y = 300.0f;
+    for (auto& el : *v5)
+    {
+        sprite[el].setPosition(total_x, total_y);
+        window->draw(sprite[el]);
+        total_y += 50;
+    }
+    total_x += 200.0f;
+    total_y = 300.0f;
+    for (auto& el : *v6)
+    {
+        sprite[el].setPosition(total_x, total_y);
+        window->draw(sprite[el]);
+        total_y += 50;
+    }
+    total_x += 200.0f;
+    total_y = 300.0f;
+    for (auto& el : *v7)
+    {
+        sprite[el].setPosition(total_x, total_y);
+        window->draw(sprite[el]);
+        total_y += 50;
+    }
 }
