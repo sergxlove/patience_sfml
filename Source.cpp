@@ -2,28 +2,32 @@
 #include <vector>
 #include <ctime>
 #include <iterator>
+#include <algorithm>
 using namespace sf;
 using namespace std;
 class Card
 {
 public:
-    Card(int index, int mast, int color, float pozitionX, float pozitionY);
+    Card(int index, int mast, int color, float pozitionX, float pozitionY,bool visible);
     Card();
     void setIndex(int index);
     void setMast(int mast);
     void setColor(int color);
     void setPozition(float pozitionX, float PozitionY);
+    void setVisible(bool visible);
     int getIndex();
     int getMast();
     int getColor();
     float getPozitionX();
     float getPozitionY();
+    bool getVisible();
 private:
     int index;
     int mast;
     int color;
     float pozitionX;
     float pozitionY;
+    bool visible;
 };
 inline vector<Card> fieldArray();
 inline vector<Sprite> field_array_for_card(Texture* texture);
@@ -32,6 +36,7 @@ inline vector<bool> field_check_array();
 inline vector<int> field_array_shop(vector<bool>* check);
 inline vector<Sprite> field_array_sprite(Texture* texture, vector<Card>* arrayCard);
 inline void draw_all_cols(RenderWindow* window, vector<Sprite> &sprite, vector<int>* v1, vector<int>* v2, vector<int>* v3, vector<int>* v4, vector<int>* v5, vector<int>* v6, vector<int>* v7);
+inline vector<bool> field_is_open(vector<int>* v1, vector<int>* v2, vector<int>* v3, vector<int>* v4, vector<int>* v5, vector<int>* v6, vector<int>* v7);
 enum masts
 {
     hearts,
@@ -48,6 +53,7 @@ int main()
 {
     srand(time(NULL));
     RenderWindow window(VideoMode(1600, 900), "Patience");
+    Clock clock;
     vector<Card> arrayCard = fieldArray();
     Image all_card;
     all_card.loadFromFile("images/cards.png");
@@ -58,6 +64,10 @@ int main()
     shop_spr.setTextureRect(IntRect(2160, 20, 164, 230));
     shop_spr.setPosition(50, 50);
     shop_spr.setScale(0.8f, 0.8f);
+    Sprite closed_card;
+    closed_card.setTexture(texture_cards);
+    closed_card.setTextureRect(IntRect(2160, 482, 164, 230));
+    closed_card.setScale(0.8f, 0.8f);
     vector<Sprite> slot_for_card = field_array_for_card(&texture_cards);
     vector<bool> check_using = field_check_array();
     vector<int> cols_v1 = field_cols(&check_using, 1);
@@ -68,60 +78,61 @@ int main()
     vector<int> cols_v6 = field_cols(&check_using, 6);
     vector<int> cols_v7 = field_cols(&check_using, 7);
     vector<int> arr_shop = field_array_shop(&check_using);
-    bool is_sprite_drag = false;
-    Vector2f offset;
     vector<Sprite> arr_sprites = field_array_sprite(&texture_cards, &arrayCard);
+    vector<bool> arr_is_open;
+    random_shuffle(arr_shop.begin(), arr_shop.end());
+    int count = 0;
+    bool ch = true;
     while (window.isOpen())
     {
         Event event;
-        while (window.pollEvent(event))
+        if (clock.getElapsedTime().asSeconds() > 1.0f / 15.0f)
         {
-            if (event.type == Event::Closed)
+            while (window.pollEvent(event))
             {
-                window.close();
-            }
-            if (event.type == Event::MouseButtonPressed)
-            {
-                if (event.mouseButton.button == Mouse::Left)
+                if (event.type == Event::Closed)
                 {
-                    if (shop_spr.getGlobalBounds().contains(Vector2f(event.mouseButton.x, event.mouseButton.y)))
+                    window.close();
+                }
+           
+                if (event.type == Event::MouseButtonPressed)
+                {
+                    if (event.mouseButton.button == Mouse::Left)
                     {
-                        is_sprite_drag = true;
-                        offset = shop_spr.getPosition() - Vector2f(event.mouseButton.x, event.mouseButton.y);
+                        if (shop_spr.getGlobalBounds().contains(Vector2f(event.mouseButton.x, event.mouseButton.y)))
+                        {
+                            count++;
+                            if (count == arr_shop.size())
+                            {
+                                count = 0;
+                            }
+                        }
                     }
                 }
             }
-            else if (event.type == Event::MouseButtonReleased)
+            window.clear();
+            window.draw(shop_spr);
+            for (auto el : slot_for_card)
             {
-                if (event.mouseButton.button == Mouse::Left)
-                {
-                    is_sprite_drag = false;
-                }
+                window.draw(el);
             }
-            if (is_sprite_drag == true)
-            {
-                shop_spr.setPosition(Vector2f(Mouse::getPosition(window)) + offset);
-            }
+            window.draw(arr_sprites[arr_shop[count]]);
+            draw_all_cols(&window, arr_sprites, &cols_v1, &cols_v2, &cols_v3, &cols_v4, &cols_v5, &cols_v6, &cols_v7);
+            window.display();
+            clock.restart();
         }
-        window.clear();
-        window.draw(shop_spr);
-        for (auto el : slot_for_card)
-        {
-            window.draw(el);
-        }
-        draw_all_cols(&window, arr_sprites, &cols_v1, &cols_v2, &cols_v3, &cols_v4, &cols_v5, &cols_v6, &cols_v7);
-        window.display();
     }
     return 0;
 }
 
-Card::Card(int index, int mast, int color, float pozitionX, float pozitionY)
+Card::Card(int index, int mast, int color, float pozitionX, float pozitionY,bool visible)
 {
     this->index = index;
     this->mast = mast;
     this->color = color;
     this->pozitionX = pozitionX;
     this->pozitionY = pozitionY;
+    this->visible = visible;
 }
 Card::Card()
 {
@@ -130,6 +141,7 @@ Card::Card()
     this->color = 0;
     this->pozitionX = 0.0f;
     this->pozitionY = 0.0f;
+    this->visible = false;
 }
 void Card::setIndex(int index)
 {
@@ -147,6 +159,10 @@ void Card::setPozition(float pozitionX, float pozitionY)
 {
     this->pozitionX = pozitionX;
     this->pozitionY = pozitionY;
+}
+void Card::setVisible(bool visible)
+{
+    this->visible = visible;
 }
 int Card::getIndex()
 {
@@ -167,6 +183,10 @@ float Card::getPozitionX()
 float Card::getPozitionY()
 {
     return pozitionY;
+}
+bool Card::getVisible()
+{
+    return visible;
 }
 inline vector<Card> fieldArray()
 {
@@ -282,6 +302,7 @@ inline vector<Sprite> field_array_sprite(Texture* texture, vector<Card>* arrayCa
         sprite.setTexture(*texture);
         sprite.setTextureRect(IntRect(cards.getPozitionX(), cards.getPozitionY(), 164, 230));
         sprite.setScale(0.8f, 0.8f);
+        sprite.setPosition(200, 50);
         result.push_back(sprite);
     }
     return result;
@@ -344,4 +365,8 @@ inline void draw_all_cols(RenderWindow* window, vector<Sprite> &sprite, vector<i
         window->draw(sprite[el]);
         total_y += 50;
     }
+}
+inline vector<bool> field_is_open(vector<int>* v1, vector<int>* v2, vector<int>* v3, vector<int>* v4, vector<int>* v5, vector<int>* v6, vector<int>* v7)
+{
+
 }
