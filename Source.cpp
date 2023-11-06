@@ -36,7 +36,8 @@ inline vector<bool> field_check_array();
 inline vector<int> field_array_shop(vector<bool>* check);
 inline vector<Sprite> field_array_sprite(Texture* texture, vector<Card>* arrayCard);
 inline void draw_all_cols(RenderWindow* window, vector<Sprite> &sprite, vector<int>* v1, vector<int>* v2, vector<int>* v3, vector<int>* v4, vector<int>* v5, vector<int>* v6, vector<int>* v7);
-inline vector<bool> field_is_open(vector<int>* v1, vector<int>* v2, vector<int>* v3, vector<int>* v4, vector<int>* v5, vector<int>* v6, vector<int>* v7);
+inline vector<int> field_is_open(vector<int>* v1, vector<int>* v2, vector<int>* v3, vector<int>* v4, vector<int>* v5, vector<int>* v6, vector<int>* v7);
+
 enum masts
 {
     hearts,
@@ -366,7 +367,8 @@ inline void draw_all_cols(RenderWindow* window, vector<Sprite> &sprite, vector<i
         total_y += 50;
     }
 }
-inline vector<bool> field_is_open(vector<int>* v1, vector<int>* v2, vector<int>* v3, vector<int>* v4, vector<int>* v5, vector<int>* v6, vector<int>* v7)
+inline vector<int> field_is_open(vector<int>* v1, vector<int>* v2, vector<int>* v3, vector<int>* v4, vector<int>* v5, vector<int>* v6, vector<int>* v7)
 {
-
+    vector<int>result;
+    return result;
 }
