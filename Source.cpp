@@ -50,6 +50,13 @@ enum colors
     red,
     black
 };
+enum conditions
+{
+    open,
+    is_shop,
+    is_slot,
+    closed
+};
 int main()
 {
     srand(time(NULL));
@@ -69,16 +76,16 @@ int main()
     closed_card.setTexture(texture_cards);
     closed_card.setTextureRect(IntRect(2160, 482, 164, 230));
     closed_card.setScale(0.8f, 0.8f);
-    vector<Sprite> slot_for_card = field_array_for_card(&texture_cards);
-    vector<bool> check_using = field_check_array();
-    vector<int> cols_v1 = field_cols(&check_using, 1);
-    vector<int> cols_v2 = field_cols(&check_using, 2);
-    vector<int> cols_v3 = field_cols(&check_using, 3);
-    vector<int> cols_v4 = field_cols(&check_using, 4);
-    vector<int> cols_v5 = field_cols(&check_using, 5);
-    vector<int> cols_v6 = field_cols(&check_using, 6);
-    vector<int> cols_v7 = field_cols(&check_using, 7);
-    vector<int> arr_shop = field_array_shop(&check_using);
+    vector<Sprite> slot_for_card = field_array_for_card(&texture_cards);//массив спрайтов всех карт
+    vector<bool> check_using = field_check_array();//массив использования карт
+    vector<int> cols_v1 = field_cols(&check_using, 1);//первый столбец карт
+    vector<int> cols_v2 = field_cols(&check_using, 2);//второй столбец карт
+    vector<int> cols_v3 = field_cols(&check_using, 3);//третий столбец карт
+    vector<int> cols_v4 = field_cols(&check_using, 4);//четвертый столбец карт
+    vector<int> cols_v5 = field_cols(&check_using, 5);//пятый столбец карт
+    vector<int> cols_v6 = field_cols(&check_using, 6);//шестой столбец карт 
+    vector<int> cols_v7 = field_cols(&check_using, 7);//седьмой столбец карт
+    vector<int> arr_shop = field_array_shop(&check_using);//массив карт в магазине
     vector<Sprite> arr_sprites = field_array_sprite(&texture_cards, &arrayCard);
     vector<bool> arr_is_open;
     random_shuffle(arr_shop.begin(), arr_shop.end());
