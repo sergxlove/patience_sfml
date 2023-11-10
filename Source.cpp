@@ -86,9 +86,9 @@ int main()
     vector<int> cols_v6 = field_cols(&check_using, 6);//шестой столбец карт 
     vector<int> cols_v7 = field_cols(&check_using, 7);//седьмой столбец карт
     vector<int> arr_shop = field_array_shop(&check_using);//массив карт в магазине
-    vector<Sprite> arr_sprites = field_array_sprite(&texture_cards, &arrayCard);
-    vector<bool> arr_is_open;
+    vector<Sprite> arr_sprites = field_array_sprite(&texture_cards, &arrayCard);//массив для отрисовки карт магазина
     random_shuffle(arr_shop.begin(), arr_shop.end());
+    vector<int> arr_conditions;
     int count = 0;
     bool ch = true;
     while (window.isOpen())
