@@ -8,7 +8,7 @@ using namespace std;
 class Card
 {
 public:
-    Card(int index, int mast, int color, float pozitionX, float pozitionY,bool visible);
+    Card(int index, int mast, int color, float pozitionX, float pozitionY);
     Card();
     void setIndex(int index);
     void setMast(int mast);
@@ -20,14 +20,12 @@ public:
     int getColor();
     float getPozitionX();
     float getPozitionY();
-    bool getVisible();
 private:
     int index;
     int mast;
     int color;
     float pozitionX;
     float pozitionY;
-    bool visible;
 };
 inline vector<Card> fieldArray();
 inline vector<Sprite> field_array_for_card(Texture* texture);
@@ -62,20 +60,24 @@ int main()
     srand(time(NULL));
     RenderWindow window(VideoMode(1600, 900), "Patience");
     Clock clock;
+    //оформление
     vector<Card> arrayCard = fieldArray();
     Image all_card;
     all_card.loadFromFile("images/cards.png");
     Texture texture_cards;
     texture_cards.loadFromImage(all_card);
-    Sprite shop_spr;
+    Sprite shop_spr;//иконка магазина
     shop_spr.setTexture(texture_cards);
     shop_spr.setTextureRect(IntRect(2160, 20, 164, 230));
     shop_spr.setPosition(50, 50);
     shop_spr.setScale(0.8f, 0.8f);
-    Sprite closed_card;
+    Sprite closed_card;//иконка закрытой карты
     closed_card.setTexture(texture_cards);
     closed_card.setTextureRect(IntRect(2160, 482, 164, 230));
     closed_card.setScale(0.8f, 0.8f);
+    //
+    //
+    //
     vector<Sprite> slot_for_card = field_array_for_card(&texture_cards);//массив спрайтов всех карт
     vector<bool> check_using = field_check_array();//массив использования карт
     vector<int> cols_v1 = field_cols(&check_using, 1);//первый столбец карт
@@ -133,14 +135,13 @@ int main()
     return 0;
 }
 
-Card::Card(int index, int mast, int color, float pozitionX, float pozitionY,bool visible)
+Card::Card(int index, int mast, int color, float pozitionX, float pozitionY)
 {
     this->index = index;
     this->mast = mast;
     this->color = color;
     this->pozitionX = pozitionX;
     this->pozitionY = pozitionY;
-    this->visible = visible;
 }
 Card::Card()
 {
@@ -149,7 +150,6 @@ Card::Card()
     this->color = 0;
     this->pozitionX = 0.0f;
     this->pozitionY = 0.0f;
-    this->visible = false;
 }
 void Card::setIndex(int index)
 {
@@ -167,10 +167,6 @@ void Card::setPozition(float pozitionX, float pozitionY)
 {
     this->pozitionX = pozitionX;
     this->pozitionY = pozitionY;
-}
-void Card::setVisible(bool visible)
-{
-    this->visible = visible;
 }
 int Card::getIndex()
 {
@@ -191,10 +187,6 @@ float Card::getPozitionX()
 float Card::getPozitionY()
 {
     return pozitionY;
-}
-bool Card::getVisible()
-{
-    return visible;
 }
 inline vector<Card> fieldArray()
 {
@@ -379,3 +371,4 @@ inline vector<int> field_is_open(vector<int>* v1, vector<int>* v2, vector<int>* 
     vector<int>result;
     return result;
 }
+
