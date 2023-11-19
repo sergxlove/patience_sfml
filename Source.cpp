@@ -399,6 +399,6 @@ inline void draw_all_cols(RenderWindow* window, vector<Sprite> &sprite, vector<i
 }
 inline void field_conditions(vector<Card>* arrayCard, vector<int>* v1, vector<int>* v2, vector<int>* v3, vector<int>* v4, vector<int>* v5, vector<int>* v6, vector<int>* v7, vector<int>* slot_v1, vector<int>* slot_v2, vector<int>* slot_v3, vector<int>* slot_v4, vector<int>* shop_arr)
 {
-    arrayCard[0];
+    
 }
 
