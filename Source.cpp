@@ -8,28 +8,30 @@ using namespace std;
 class Card
 {
 public:
-    Card(int index, int mast, int color, float pozitionX, float pozitionY);
-    Card();
-    void setIndex(int index);
-    void setMast(int mast);
-    void setColor(int color);
-    void setPozition(float pozitionX, float PozitionY);
-    void setVisible(bool visible);
-    int getIndex();
-    int getMast();
-    int getColor();
-    float getPozitionX();
-    float getPozitionY();
+    Card(int index, int mast, int color, float pozitionX, float pozitionY,int number);//конструктор с параметрами
+    Card();//базовый конструктор
+    void setIndex(int index);//передача индекса
+    void setMast(int mast);//передача масти
+    void setColor(int color);//передача цвета
+    void setPozition(float pozitionX, float PozitionY);//передача позиции
+    void setNumber(int number);//передача порядкового номера
+    int getIndex();//возврат нидекса
+    int getMast();//возврат масти
+    int getColor();//возврат цвета
+    float getPozitionX();//возврат позиции х
+    float getPozitionY();//возврат позиции у
+    int getNumber();//возврат порядкового номера
 private:
-    int index;
-    int mast;
-    int color;
-    float pozitionX;
-    float pozitionY;
+    int index;//индекс карты
+    int mast;//масть карты
+    int color;//цвет карты
+    float pozitionX;//позиция по х
+    float pozitionY;//позиция по у
+    int number;//порядковый номер элемента
 };
-inline vector<Card> fieldArray();
-inline vector<Sprite> field_array_for_card(Texture* texture);
-inline vector<int> field_cols(vector<bool>* check, int size);
+inline vector<Card> fieldArray();//заполнение массива карт
+inline vector<Sprite> field_array_for_card(Texture* texture);//заполнение массива спрайтов карт
+inline vector<int> field_cols(vector<bool>* check, int size);//заполнение колонки
 inline vector<bool> field_check_array();
 inline vector<int> field_array_shop(vector<bool>* check);
 inline vector<Sprite> field_array_sprite(Texture* texture, vector<Card>* arrayCard);
@@ -135,13 +137,14 @@ int main()
     return 0;
 }
 
-Card::Card(int index, int mast, int color, float pozitionX, float pozitionY)
+Card::Card(int index, int mast, int color, float pozitionX, float pozitionY, int number)
 {
     this->index = index;
     this->mast = mast;
     this->color = color;
     this->pozitionX = pozitionX;
     this->pozitionY = pozitionY;
+    this->number = number;
 }
 Card::Card()
 {
@@ -150,6 +153,7 @@ Card::Card()
     this->color = 0;
     this->pozitionX = 0.0f;
     this->pozitionY = 0.0f;
+    this->number = 0;
 }
 void Card::setIndex(int index)
 {
@@ -167,6 +171,10 @@ void Card::setPozition(float pozitionX, float pozitionY)
 {
     this->pozitionX = pozitionX;
     this->pozitionY = pozitionY;
+}
+void Card::setNumber(int number)
+{
+    this->number = number;
 }
 int Card::getIndex()
 {
@@ -188,17 +196,24 @@ float Card::getPozitionY()
 {
     return pozitionY;
 }
+int Card::getNumber()
+{
+    return number;
+}
 inline vector<Card> fieldArray()
 {
     vector<Card> result;
     int totalIndex = 0;
     int cols = 0;
+    int n = 0;
     result.reserve(52);
     for (int i = 0;i < 52;i++)
     {
         Card card;
         card.setIndex(totalIndex);
         card.setPozition(20 + (totalIndex * 164.2), 20 + (cols * 230));
+        card.setNumber(n);
+        n++;
         if (cols == 0)
         {
             card.setColor(colors::red);
