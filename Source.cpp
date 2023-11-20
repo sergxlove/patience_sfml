@@ -15,12 +15,16 @@ public:
     void setColor(int color);//передача цвета
     void setPozition(float pozitionX, float PozitionY);//передача позиции
     void setNumber(int number);//передача порядкового номера
+    void setUsers(bool users);//передача использования карты
+    void setCondition(int condition);//передача состояния карты
     int getIndex();//возврат нидекса
     int getMast();//возврат масти
     int getColor();//возврат цвета
     float getPozitionX();//возврат позиции х
     float getPozitionY();//возврат позиции у
     int getNumber();//возврат порядкового номера
+    bool getUsers();//возврат использования карты
+    int getCondition();//возврат состояния карты
 private:
     int index;//индекс карты
     int mast;//масть карты
@@ -28,15 +32,16 @@ private:
     float pozitionX;//позиция по х
     float pozitionY;//позиция по у
     int number;//порядковый номер элемента
+    bool users;//использование карты
+    int condition;//состояние карты
 };
 inline vector<Card> fieldArray();//заполнение массива карт
 inline vector<Sprite> field_array_for_card(Texture* texture);//заполнение массива спрайтов карт
-inline vector<int> field_cols(vector<bool>* check, int size);//заполнение колонки
-inline vector<bool> field_check_array();
-inline vector<int> field_array_shop(vector<bool>* check);
-inline vector<Sprite> field_array_sprite(Texture* texture, vector<Card>* arrayCard);
-inline void draw_all_cols(RenderWindow* window, vector<Sprite> &sprite, vector<int>* v1, vector<int>* v2, vector<int>* v3, vector<int>* v4, vector<int>* v5, vector<int>* v6, vector<int>* v7);
-inline vector<int> field_is_open(vector<int>* v1, vector<int>* v2, vector<int>* v3, vector<int>* v4, vector<int>* v5, vector<int>* v6, vector<int>* v7);
+inline vector<int> field_cols(vector<Card>* check, int size);//заполнение колонки
+inline vector<int>field_array_shop(vector<Card>* check);//заполнение массива магазина картами
+inline vector<Sprite> field_array_sprite(Texture* texture, vector<Card>* arrayCard);//заполнение массива для отрисовки
+inline void draw_all_cols(RenderWindow* window, vector<Sprite> &sprite, vector<int>* v1, vector<int>* v2, vector<int>* v3, vector<int>* v4, vector<int>* v5, vector<int>* v6, vector<int>* v7);//отрисовка всех колонок
+inline void field_conditions(vector<Card>* arrayCard, vector<int>* v1, vector<int>* v2, vector<int>* v3, vector<int>* v4, vector<int>* v5, vector<int>* v6, vector<int>* v7, vector<int>* slot_v1, vector<int>* slot_v2, vector<int>* slot_v3, vector<int>* slot_v4, vector<int>* shop_arr);
 
 enum masts
 {
@@ -55,7 +60,8 @@ enum conditions
     open,
     is_shop,
     is_slot,
-    closed
+    closed,
+    none
 };
 int main()
 {
@@ -81,20 +87,22 @@ int main()
     //
     //
     vector<Sprite> slot_for_card = field_array_for_card(&texture_cards);//массив спрайтов всех карт
-    vector<bool> check_using = field_check_array();//массив использования карт
-    vector<int> cols_v1 = field_cols(&check_using, 1);//первый столбец карт
-    vector<int> cols_v2 = field_cols(&check_using, 2);//второй столбец карт
-    vector<int> cols_v3 = field_cols(&check_using, 3);//третий столбец карт
-    vector<int> cols_v4 = field_cols(&check_using, 4);//четвертый столбец карт
-    vector<int> cols_v5 = field_cols(&check_using, 5);//пятый столбец карт
-    vector<int> cols_v6 = field_cols(&check_using, 6);//шестой столбец карт 
-    vector<int> cols_v7 = field_cols(&check_using, 7);//седьмой столбец карт
-    vector<int> arr_shop = field_array_shop(&check_using);//массив карт в магазине
+    vector<int> cols_v1 = field_cols(&arrayCard, 1);//первый столбец карт
+    vector<int> cols_v2 = field_cols(&arrayCard, 2);//второй столбец карт
+    vector<int> cols_v3 = field_cols(&arrayCard, 3);//третий столбец карт
+    vector<int> cols_v4 = field_cols(&arrayCard, 4);//четвертый столбец карт
+    vector<int> cols_v5 = field_cols(&arrayCard, 5);//пятый столбец карт
+    vector<int> cols_v6 = field_cols(&arrayCard, 6);//шестой столбец карт 
+    vector<int> cols_v7 = field_cols(&arrayCard, 7);//седьмой столбец карт
+    vector<int> slot_v1;//первый слот карт
+    vector<int> slot_v2;//второй слот карт
+    vector<int> slot_v3;//третий слот карт
+    vector<int> slot_v4;//четвертый слот карт
+    vector<int> arr_shop = field_array_shop(&arrayCard);//массив карт в магазине
     vector<Sprite> arr_sprites = field_array_sprite(&texture_cards, &arrayCard);//массив для отрисовки карт магазина
     random_shuffle(arr_shop.begin(), arr_shop.end());
-    vector<int> arr_conditions;
+    field_conditions(&arrayCard, &cols_v1, &cols_v2, &cols_v3, &cols_v4, &cols_v5, &cols_v6, &cols_v7, &slot_v1, &slot_v2, &slot_v3, &slot_v4, &arr_shop);
     int count = 0;
-    bool ch = true;
     while (window.isOpen())
     {
         Event event;
@@ -145,6 +153,8 @@ Card::Card(int index, int mast, int color, float pozitionX, float pozitionY, int
     this->pozitionX = pozitionX;
     this->pozitionY = pozitionY;
     this->number = number;
+    this->users = false;
+    this->condition = conditions::none;
 }
 Card::Card()
 {
@@ -154,6 +164,8 @@ Card::Card()
     this->pozitionX = 0.0f;
     this->pozitionY = 0.0f;
     this->number = 0;
+    this->users = false;
+    this->condition = conditions::none;
 }
 void Card::setIndex(int index)
 {
@@ -175,6 +187,14 @@ void Card::setPozition(float pozitionX, float pozitionY)
 void Card::setNumber(int number)
 {
     this->number = number;
+}
+void Card::setUsers(bool users)
+{
+    this->users = users;
+}
+void Card::setCondition(int condition)
+{
+    this->condition = condition;
 }
 int Card::getIndex()
 {
@@ -199,6 +219,14 @@ float Card::getPozitionY()
 int Card::getNumber()
 {
     return number;
+}
+bool Card::getUsers()
+{
+    return users;
+}
+int Card::getCondition()
+{
+    return condition;
 }
 inline vector<Card> fieldArray()
 {
@@ -261,17 +289,7 @@ inline vector<Sprite> field_array_for_card(Texture *texture)
     }
     return result;
 }
-inline vector<bool> field_check_array()
-{
-    vector<bool> result;
-    result.reserve(52);
-    for (int i = 0;i < 52;i++)
-    {
-        result.push_back(false);
-    }
-    return result;
-}
-inline vector<int> field_cols(vector<bool>* check, int size)
+inline vector<int> field_cols(vector<Card>* check, int size)
 {
     vector<int> result;
     result.reserve(size);
@@ -282,26 +300,26 @@ inline vector<int> field_cols(vector<bool>* check, int size)
         value = rand() % 52;
         it = check->begin();
         advance(it, value);
-        if (*it == false)
+        if (it->getUsers() == false)
         {
             result.push_back(value);
-            *it = true;
+            it->setUsers(true);
             i++;
         }
     }
     return result;
 }
-inline vector<int> field_array_shop(vector<bool>* check)
+inline vector<int>field_array_shop(vector<Card>* check)
 {
     vector<int> result;
     int count = 0;
     result.reserve(24);
-    for (auto it = check->begin();it !=check->end();it++)
+    for (auto it = check->begin();it != check->end();it++)
     {
-        if (*it == false)
+        if (it->getUsers() == false)
         {
             result.push_back(count);
-            *it = true;
+            it->setColor(true);
         }
         count++;
     }
@@ -381,9 +399,163 @@ inline void draw_all_cols(RenderWindow* window, vector<Sprite> &sprite, vector<i
         total_y += 50;
     }
 }
-inline vector<int> field_is_open(vector<int>* v1, vector<int>* v2, vector<int>* v3, vector<int>* v4, vector<int>* v5, vector<int>* v6, vector<int>* v7)
+inline void field_conditions(vector<Card>* arrayCard, vector<int>* v1, vector<int>* v2, vector<int>* v3, vector<int>* v4, vector<int>* v5, vector<int>* v6, vector<int>* v7, vector<int>* slot_v1, vector<int>* slot_v2, vector<int>* slot_v3, vector<int>* slot_v4, vector<int>* shop_arr)
 {
-    vector<int>result;
-    return result;
+    auto it = arrayCard->begin();
+    if (!slot_v1->empty())
+    {
+        for (auto& el : *slot_v1)
+        {
+            advance(it, el);
+            it->setCondition(conditions::is_slot);
+            it = arrayCard->begin();
+        }
+    }
+    if (!slot_v2->empty())
+    {
+        for (auto& el : *slot_v2)
+        {
+            advance(it, el);
+            it->setCondition(conditions::is_slot);
+            it = arrayCard->begin();
+        }
+    }
+    if (!slot_v3->empty())
+    {
+        for (auto& el : *slot_v3)
+        {
+            advance(it, el);
+            it->setCondition(conditions::is_slot);
+            it = arrayCard->begin();
+        }
+    }
+    if (!slot_v4->empty())
+    {
+        for (auto& el : *slot_v4)
+        {
+            advance(it, el);
+            it->setCondition(conditions::is_slot);
+            it = arrayCard->begin();
+        }
+    }
+    auto it_v = v1->begin();
+    for (auto& el : *v1)
+    {
+        it = arrayCard->begin();
+        if (it_v++ != v1->end())
+        {
+            advance(it, el);
+            it->setCondition(conditions::closed);
+        }
+        else
+        {
+            advance(it, el);
+            it->setCondition(conditions::open);
+        }
+        it_v++;
+    }
+    it_v = v2->begin();
+    for (auto& el : *v2)
+    {
+        it = arrayCard->begin();
+        if (it_v++ != v2->end())
+        {
+            advance(it, el);
+            it->setCondition(conditions::closed);
+        }
+        else
+        {
+            advance(it, el);
+            it->setCondition(conditions::open);
+        }
+        it_v++;
+    }
+    it_v = v3->begin();
+    for (auto& el : *v3)
+    {
+        it = arrayCard->begin();
+        if (it_v++ != v3->end())
+        {
+            advance(it, el);
+            it->setCondition(conditions::closed);
+        }
+        else
+        {
+            advance(it, el);
+            it->setCondition(conditions::open);
+        }
+        it_v++;
+    }
+    it_v = v4->begin();
+    for (auto& el : *v4)
+    {
+        it = arrayCard->begin();
+        if (it_v++ != v4->end())
+        {
+            advance(it, el);
+            it->setCondition(conditions::closed);
+        }
+        else
+        {
+            advance(it, el);
+            it->setCondition(conditions::open);
+        }
+        it_v++;
+    }
+    it_v = v5->begin();
+    for (auto& el : *v5)
+    {
+        it = arrayCard->begin();
+        if (it_v++ != v5->end())
+        {
+            advance(it, el);
+            it->setCondition(conditions::closed);
+        }
+        else
+        {
+            advance(it, el);
+            it->setCondition(conditions::open);
+        }
+        it_v++;
+    }
+    it_v = v6->begin();
+    for (auto& el : *v6)
+    {
+        it = arrayCard->begin();
+        if (it_v++ != v6->end())
+        {
+            advance(it, el);
+            it->setCondition(conditions::closed);
+        }
+        else
+        {
+            advance(it, el);
+            it->setCondition(conditions::open);
+        }
+        it_v++;
+    }
+    it_v = v7->begin();
+    for (auto& el : *v7)
+    {
+        it = arrayCard->begin();
+        if (it_v++ != v7->end())
+        {
+            advance(it, el);
+            it->setCondition(conditions::closed);
+        }
+        else
+        {
+            advance(it, el);
+            it->setCondition(conditions::open);
+        }
+        it_v++;
+    }
+    for (auto& el : *arrayCard)
+    {
+        if (el.getCondition() == conditions::none)
+        {
+            el.setCondition(conditions::is_shop);
+        }
+    }
 }
 
