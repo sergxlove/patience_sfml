@@ -442,113 +442,113 @@ inline void field_conditions(vector<Card>* arrayCard, vector<int>* v1, vector<in
     for (auto& el : *v1)
     {
         it = arrayCard->begin();
-        if (it_v++ != v1->end())
-        {
-            advance(it, el);
-            it->setCondition(conditions::closed);
-        }
-        else
+        if (it_v == v1->end() - 1)
         {
             advance(it, el);
             it->setCondition(conditions::open);
         }
-        it_v++;
+        else
+        {
+            advance(it, el);
+            it->setCondition(conditions::closed);
+            it_v++;
+        }
     }
     it_v = v2->begin();
     for (auto& el : *v2)
     {
         it = arrayCard->begin();
-        if (it_v++ != v2->end())
-        {
-            advance(it, el);
-            it->setCondition(conditions::closed);
-        }
-        else
+        if (it_v == v2->end() - 1)
         {
             advance(it, el);
             it->setCondition(conditions::open);
         }
-        it_v++;
+        else
+        {
+            advance(it, el);
+            it->setCondition(conditions::closed);
+            it_v++;
+        }
     }
     it_v = v3->begin();
     for (auto& el : *v3)
     {
         it = arrayCard->begin();
-        if (it_v++ != v3->end())
-        {
-            advance(it, el);
-            it->setCondition(conditions::closed);
-        }
-        else
+        if (it_v == v3->end() - 1)
         {
             advance(it, el);
             it->setCondition(conditions::open);
         }
-        it_v++;
+        else
+        {
+            advance(it, el);
+            it->setCondition(conditions::closed);
+            it_v++;
+        }
     }
     it_v = v4->begin();
     for (auto& el : *v4)
     {
         it = arrayCard->begin();
-        if (it_v++ != v4->end())
-        {
-            advance(it, el);
-            it->setCondition(conditions::closed);
-        }
-        else
+        if (it_v == v4->end() - 1)
         {
             advance(it, el);
             it->setCondition(conditions::open);
         }
-        it_v++;
+        else
+        {
+            advance(it, el);
+            it->setCondition(conditions::closed);
+            it_v++;
+        }
     }
     it_v = v5->begin();
     for (auto& el : *v5)
     {
         it = arrayCard->begin();
-        if (it_v++ != v5->end())
-        {
-            advance(it, el);
-            it->setCondition(conditions::closed);
-        }
-        else
+        if (it_v == v5->end() - 1)
         {
             advance(it, el);
             it->setCondition(conditions::open);
         }
-        it_v++;
+        else
+        {
+            advance(it, el);
+            it->setCondition(conditions::closed);
+            it_v++;
+        }
     }
     it_v = v6->begin();
     for (auto& el : *v6)
     {
         it = arrayCard->begin();
-        if (it_v++ != v6->end())
-        {
-            advance(it, el);
-            it->setCondition(conditions::closed);
-        }
-        else
+        if (it_v == v6->end() - 1)
         {
             advance(it, el);
             it->setCondition(conditions::open);
         }
-        it_v++;
+        else
+        {
+            advance(it, el);
+            it->setCondition(conditions::closed);
+            it_v++;
+        }
     }
     it_v = v7->begin();
     for (auto& el : *v7)
     {
         it = arrayCard->begin();
-        if (it_v++ != v7->end())
-        {
-            advance(it, el);
-            it->setCondition(conditions::closed);
-        }
-        else
+        if (it_v == v7->end() - 1)
         {
             advance(it, el);
             it->setCondition(conditions::open);
         }
-        it_v++;
+        else
+        {
+            advance(it, el);
+            it->setCondition(conditions::closed);
+            it_v++;
+        }
     }
     for (auto& el : *arrayCard)
     {
