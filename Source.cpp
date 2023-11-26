@@ -43,6 +43,7 @@ inline vector<Sprite> field_array_sprite(Texture* texture, vector<Card>* arrayCa
 inline void first_draw_all_cols(RenderWindow& window, Sprite& closed_card, vector<Card>& arr, vector<Sprite>& sprite, vector<int>& v1, vector<int>& v2, vector<int>& v3, vector<int>& v4, vector<int>& v5, vector<int>& v6, vector<int>& v7);
 inline void field_conditions(vector<Card>* arrayCard, vector<int>* v1, vector<int>* v2, vector<int>* v3, vector<int>* v4, vector<int>* v5, vector<int>* v6, vector<int>* v7, vector<int>* slot_v1, vector<int>* slot_v2, vector<int>* slot_v3, vector<int>* slot_v4, vector<int>* shop_arr);//заполнение состояния карты
 inline void draw_cols(RenderWindow& window, Sprite& closed_card, vector<Card>& arr, vector<Sprite>& sprite, vector<int>& v1, vector<int>& v2, vector<int>& v3, vector<int>& v4, vector<int>& v5, vector<int>& v6, vector<int>& v7);
+inline vector<int>& getVector(int value, vector<int>& v1, vector<int>& v2, vector<int>& v3, vector<int>& v4, vector<int>& v5, vector<int>& v6, vector<int>& v7);
 
 enum masts
 {
@@ -105,6 +106,9 @@ int main()
     field_conditions(&arrayCard, &cols_v1, &cols_v2, &cols_v3, &cols_v4, &cols_v5, &cols_v6, &cols_v7, &slot_v1, &slot_v2, &slot_v3, &slot_v4, &arr_shop);
     int count = 0;
     bool first = true;
+    bool dragging = false;
+    Vector2f offset;
+    int dragging_index = -1;
     while (window.isOpen())
     {
         Event event;
@@ -129,8 +133,33 @@ int main()
                                 count = 0;
                             }
                         }
+                        for (int i = 0;i < arr_sprites.size();i++)
+                        {
+                            if (arr_sprites[i].getGlobalBounds().contains(event.mouseButton.x, event.mouseButton.y) && arrayCard[i].getCondition() == conditions::open)
+                            {
+                                dragging = true;
+                                offset = Vector2f(event.mouseButton.x, event.mouseButton.y) - arr_sprites[i].getPosition();
+                                dragging_index = i;
+                                break;
+                            }
+                        }
                     }
                 }
+                if (event.type == Event::MouseButtonReleased)
+                {
+                    if (event.mouseButton.button == Mouse::Left)
+                    {
+                        dragging = false;
+                        if (dragging_index != -1)
+                        {
+
+                        }
+                    }
+                }
+            }
+            if (dragging)
+            {
+                arr_sprites[dragging_index].setPosition(Vector2f(Mouse::getPosition(window))-offset);
             }
             window.clear();
             window.draw(shop_spr);
@@ -147,6 +176,10 @@ int main()
             else
             {
                 draw_cols(window, closed_card, arrayCard, arr_sprites, cols_v1, cols_v2, cols_v3, cols_v4, cols_v5, cols_v6, cols_v7);
+            }
+            if (dragging)
+            {
+                window.draw(arr_sprites[dragging_index]);
             }
             window.display();
             clock.restart();
@@ -725,5 +758,85 @@ inline void draw_cols(RenderWindow& window, Sprite& closed_card, vector<Card>& a
         }
     }
 }
-
+inline vector<int>& getVector(int value, vector<int>& v1, vector<int>& v2, vector<int>& v3, vector<int>& v4, vector<int>& v5, vector<int>& v6, vector<int>& v7)
+{
+    bool check = false;
+    for (auto& el : v1)
+    {
+        if (el == value)
+        {
+            check = true;
+        }
+        if (check)
+        {
+            return v1;
+        }
+    }
+    for (auto& el : v2)
+    {
+        if (el == value)
+        {
+            check = true;
+        }
+        if (check)
+        {
+            return v2;
+        }
+    }
+    for (auto& el : v3)
+    {
+        if (el == value)
+        {
+            check = true;
+        }
+        if (check)
+        {
+            return v3;
+        }
+    }
+    for (auto& el : v4)
+    {
+        if (el == value)
+        {
+            check = true;
+        }
+        if (check)
+        {
+            return v4;
+        }
+    }
+    for (auto& el : v5)
+    {
+        if (el == value)
+        {
+            check = true;
+        }
+        if (check)
+        {
+            return v5;
+        }
+    }
+    for (auto& el : v6)
+    {
+        if (el == value)
+        {
+            check = true;
+        }
+        if (check)
+        {
+            return v6;
+        }
+    }
+    for (auto& el : v7)
+    {
+        if (el == value)
+        {
+            check = true;
+        }
+        if (check)
+        {
+            return v7;
+        }
+    }
+}
 
