@@ -40,8 +40,10 @@ inline vector<Sprite> field_array_for_card(Texture* texture);//заполнение массив
 inline vector<int> field_cols(vector<Card>* check, int size);//заполнение колонки
 inline vector<int>field_array_shop(vector<Card>* check);//заполнение массива магазина картами
 inline vector<Sprite> field_array_sprite(Texture* texture, vector<Card>* arrayCard);//заполнение массива для отрисовки
-inline void draw_all_cols(RenderWindow* window, vector<Sprite> &sprite, vector<int>* v1, vector<int>* v2, vector<int>* v3, vector<int>* v4, vector<int>* v5, vector<int>* v6, vector<int>* v7);//отрисовка всех колонок
-inline void field_conditions(vector<Card>* arrayCard, vector<int>* v1, vector<int>* v2, vector<int>* v3, vector<int>* v4, vector<int>* v5, vector<int>* v6, vector<int>* v7, vector<int>* slot_v1, vector<int>* slot_v2, vector<int>* slot_v3, vector<int>* slot_v4, vector<int>* shop_arr);
+inline void first_draw_all_cols(RenderWindow& window, Sprite& closed_card, vector<Card>& arr, vector<Sprite>& sprite, vector<int>& v1, vector<int>& v2, vector<int>& v3, vector<int>& v4, vector<int>& v5, vector<int>& v6, vector<int>& v7);
+inline void field_conditions(vector<Card>* arrayCard, vector<int>* v1, vector<int>* v2, vector<int>* v3, vector<int>* v4, vector<int>* v5, vector<int>* v6, vector<int>* v7, vector<int>* slot_v1, vector<int>* slot_v2, vector<int>* slot_v3, vector<int>* slot_v4, vector<int>* shop_arr);//заполнение состояния карты
+inline void draw_cols(RenderWindow& window, Sprite& closed_card, vector<Card>& arr, vector<Sprite>& sprite, vector<int>& v1, vector<int>& v2, vector<int>& v3, vector<int>& v4, vector<int>& v5, vector<int>& v6, vector<int>& v7);
+inline vector<int>& getVector(int value, vector<int>& v1, vector<int>& v2, vector<int>& v3, vector<int>& v4, vector<int>& v5, vector<int>& v6, vector<int>& v7);
 
 enum masts
 {
@@ -99,10 +101,14 @@ int main()
     vector<int> slot_v3;//третий слот карт
     vector<int> slot_v4;//четвертый слот карт
     vector<int> arr_shop = field_array_shop(&arrayCard);//массив карт в магазине
-    vector<Sprite> arr_sprites = field_array_sprite(&texture_cards, &arrayCard);//массив для отрисовки карт магазина
+    vector<Sprite> arr_sprites = field_array_sprite(&texture_cards, &arrayCard);//массив для отрисовки карт
     random_shuffle(arr_shop.begin(), arr_shop.end());
     field_conditions(&arrayCard, &cols_v1, &cols_v2, &cols_v3, &cols_v4, &cols_v5, &cols_v6, &cols_v7, &slot_v1, &slot_v2, &slot_v3, &slot_v4, &arr_shop);
     int count = 0;
+    bool first = true;
+    bool dragging = false;
+    Vector2f offset;
+    int dragging_index = -1;
     while (window.isOpen())
     {
         Event event;
@@ -127,17 +133,54 @@ int main()
                                 count = 0;
                             }
                         }
+                        for (int i = 0;i < arr_sprites.size();i++)
+                        {
+                            if (arr_sprites[i].getGlobalBounds().contains(event.mouseButton.x, event.mouseButton.y) && arrayCard[i].getCondition() == conditions::open)
+                            {
+                                dragging = true;
+                                offset = Vector2f(event.mouseButton.x, event.mouseButton.y) - arr_sprites[i].getPosition();
+                                dragging_index = i;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (event.type == Event::MouseButtonReleased)
+                {
+                    if (event.mouseButton.button == Mouse::Left)
+                    {
+                        dragging = false;
+                        if (dragging_index != -1)
+                        {
+
+                        }
                     }
                 }
             }
+            if (dragging)
+            {
+                arr_sprites[dragging_index].setPosition(Vector2f(Mouse::getPosition(window))-offset);
+            }
             window.clear();
             window.draw(shop_spr);
-            for (auto el : slot_for_card)
+            for (auto &el : slot_for_card)
             {
                 window.draw(el);
             }
             window.draw(arr_sprites[arr_shop[count]]);
-            draw_all_cols(&window, arr_sprites, &cols_v1, &cols_v2, &cols_v3, &cols_v4, &cols_v5, &cols_v6, &cols_v7);
+            if (first)
+            {
+                first_draw_all_cols(window, closed_card, arrayCard, arr_sprites, cols_v1, cols_v2, cols_v3, cols_v4, cols_v5, cols_v6, cols_v7);
+                first = false;
+            }
+            else
+            {
+                draw_cols(window, closed_card, arrayCard, arr_sprites, cols_v1, cols_v2, cols_v3, cols_v4, cols_v5, cols_v6, cols_v7);
+            }
+            if (dragging)
+            {
+                window.draw(arr_sprites[dragging_index]);
+            }
             window.display();
             clock.restart();
         }
@@ -340,63 +383,133 @@ inline vector<Sprite> field_array_sprite(Texture* texture, vector<Card>* arrayCa
     }
     return result;
 }
-inline void draw_all_cols(RenderWindow* window, vector<Sprite> &sprite, vector<int>* v1, vector<int>* v2, vector<int>* v3, vector<int>* v4, vector<int>* v5, vector<int>* v6, vector<int>* v7)
+inline void first_draw_all_cols(RenderWindow& window, Sprite &closed_card, vector<Card>& arr, vector<Sprite>& sprite, vector<int>& v1, vector<int>& v2, vector<int>& v3, vector<int>& v4, vector<int>& v5, vector<int>& v6, vector<int>& v7)
 {
     float total_x = 200.0f;
     float total_y = 300.0f;
-    for (auto& el : *v1)
+    for (auto& el : v1)
     {
-        sprite[el].setPosition(total_x, total_y);
-        window->draw(sprite[el]);
-        total_y += 50;
+        if (arr[el].getCondition() == conditions::closed)
+        {
+            closed_card.setPosition(total_x, total_y);
+            sprite[el].setPosition(total_x, total_y);
+            window.draw(closed_card);
+            total_y += 50;
+        }
+        else
+        {
+            sprite[el].setPosition(total_x, total_y);
+            window.draw(sprite[el]);
+            total_y += 50;
+        }
     }
     total_x += 200.0f;
     total_y = 300.0f;
-    for (auto& el : *v2)
+    for (auto& el : v2)
     {
-        sprite[el].setPosition(total_x, total_y);
-        window->draw(sprite[el]);
-        total_y += 50;
+        if (arr[el].getCondition() == conditions::closed)
+        {
+            closed_card.setPosition(total_x, total_y);
+            sprite[el].setPosition(total_x, total_y);
+            window.draw(closed_card);
+            total_y += 50;
+        }
+        else
+        {
+            sprite[el].setPosition(total_x, total_y);
+            window.draw(sprite[el]);
+            total_y += 50;
+        }
     }
     total_x += 200.0f;
     total_y = 300.0f;
-    for (auto& el : *v3)
+    for (auto& el : v3)
     {
-        sprite[el].setPosition(total_x, total_y);
-        window->draw(sprite[el]);
-        total_y += 50;
+        if (arr[el].getCondition() == conditions::closed)
+        {
+            closed_card.setPosition(total_x, total_y);
+            sprite[el].setPosition(total_x, total_y);
+            window.draw(closed_card);
+            total_y += 50;
+        }
+        else
+        {
+            sprite[el].setPosition(total_x, total_y);
+            window.draw(sprite[el]);
+            total_y += 50;
+        }
     }
     total_x += 200.0f;
     total_y = 300.0f;
-    for (auto& el : *v4)
+    for (auto& el : v4)
     {
-        sprite[el].setPosition(total_x, total_y);
-        window->draw(sprite[el]);
-        total_y += 50;
+        if (arr[el].getCondition() == conditions::closed)
+        {
+            closed_card.setPosition(total_x, total_y);
+            sprite[el].setPosition(total_x, total_y);
+            window.draw(closed_card);
+            total_y += 50;
+        }
+        else
+        {
+            sprite[el].setPosition(total_x, total_y);
+            window.draw(sprite[el]);
+            total_y += 50;
+        }
     }
     total_x += 200.0f;
     total_y = 300.0f;
-    for (auto& el : *v5)
+    for (auto& el : v5)
     {
-        sprite[el].setPosition(total_x, total_y);
-        window->draw(sprite[el]);
-        total_y += 50;
+        if (arr[el].getCondition() == conditions::closed)
+        {
+            closed_card.setPosition(total_x, total_y);
+            sprite[el].setPosition(total_x, total_y);
+            window.draw(closed_card);
+            total_y += 50;
+        }
+        else
+        {
+            sprite[el].setPosition(total_x, total_y);
+            window.draw(sprite[el]);
+            total_y += 50;
+        }
     }
     total_x += 200.0f;
     total_y = 300.0f;
-    for (auto& el : *v6)
+    for (auto& el : v6)
     {
-        sprite[el].setPosition(total_x, total_y);
-        window->draw(sprite[el]);
-        total_y += 50;
+        if (arr[el].getCondition() == conditions::closed)
+        {
+            closed_card.setPosition(total_x, total_y);
+            sprite[el].setPosition(total_x, total_y);
+            window.draw(closed_card);
+            total_y += 50;
+        }
+        else
+        {
+            sprite[el].setPosition(total_x, total_y);
+            window.draw(sprite[el]);
+            total_y += 50;
+        }
     }
     total_x += 200.0f;
     total_y = 300.0f;
-    for (auto& el : *v7)
+    for (auto& el : v7)
     {
-        sprite[el].setPosition(total_x, total_y);
-        window->draw(sprite[el]);
-        total_y += 50;
+        if (arr[el].getCondition() == conditions::closed)
+        {
+            closed_card.setPosition(total_x, total_y);
+            sprite[el].setPosition(total_x, total_y);
+            window.draw(closed_card);
+            total_y += 50;
+        }
+        else
+        {
+            sprite[el].setPosition(total_x, total_y);
+            window.draw(sprite[el]);
+            total_y += 50;
+        }
     }
 }
 inline void field_conditions(vector<Card>* arrayCard, vector<int>* v1, vector<int>* v2, vector<int>* v3, vector<int>* v4, vector<int>* v5, vector<int>* v6, vector<int>* v7, vector<int>* slot_v1, vector<int>* slot_v2, vector<int>* slot_v3, vector<int>* slot_v4, vector<int>* shop_arr)
@@ -442,119 +555,287 @@ inline void field_conditions(vector<Card>* arrayCard, vector<int>* v1, vector<in
     for (auto& el : *v1)
     {
         it = arrayCard->begin();
-        if (it_v++ != v1->end())
-        {
-            advance(it, el);
-            it->setCondition(conditions::closed);
-        }
-        else
+        if (it_v == v1->end() - 1)
         {
             advance(it, el);
             it->setCondition(conditions::open);
         }
-        it_v++;
+        else
+        {
+            advance(it, el);
+            it->setCondition(conditions::closed);
+            it_v++;
+        }
     }
     it_v = v2->begin();
     for (auto& el : *v2)
     {
         it = arrayCard->begin();
-        if (it_v++ != v2->end())
-        {
-            advance(it, el);
-            it->setCondition(conditions::closed);
-        }
-        else
+        if (it_v == v2->end() - 1)
         {
             advance(it, el);
             it->setCondition(conditions::open);
         }
-        it_v++;
+        else
+        {
+            advance(it, el);
+            it->setCondition(conditions::closed);
+            it_v++;
+        }
     }
     it_v = v3->begin();
     for (auto& el : *v3)
     {
         it = arrayCard->begin();
-        if (it_v++ != v3->end())
-        {
-            advance(it, el);
-            it->setCondition(conditions::closed);
-        }
-        else
+        if (it_v == v3->end() - 1)
         {
             advance(it, el);
             it->setCondition(conditions::open);
         }
-        it_v++;
+        else
+        {
+            advance(it, el);
+            it->setCondition(conditions::closed);
+            it_v++;
+        }
     }
     it_v = v4->begin();
     for (auto& el : *v4)
     {
         it = arrayCard->begin();
-        if (it_v++ != v4->end())
-        {
-            advance(it, el);
-            it->setCondition(conditions::closed);
-        }
-        else
+        if (it_v == v4->end() - 1)
         {
             advance(it, el);
             it->setCondition(conditions::open);
         }
-        it_v++;
+        else
+        {
+            advance(it, el);
+            it->setCondition(conditions::closed);
+            it_v++;
+        }
     }
     it_v = v5->begin();
     for (auto& el : *v5)
     {
         it = arrayCard->begin();
-        if (it_v++ != v5->end())
-        {
-            advance(it, el);
-            it->setCondition(conditions::closed);
-        }
-        else
+        if (it_v == v5->end() - 1)
         {
             advance(it, el);
             it->setCondition(conditions::open);
         }
-        it_v++;
+        else
+        {
+            advance(it, el);
+            it->setCondition(conditions::closed);
+            it_v++;
+        }
     }
     it_v = v6->begin();
     for (auto& el : *v6)
     {
         it = arrayCard->begin();
-        if (it_v++ != v6->end())
-        {
-            advance(it, el);
-            it->setCondition(conditions::closed);
-        }
-        else
+        if (it_v == v6->end() - 1)
         {
             advance(it, el);
             it->setCondition(conditions::open);
         }
-        it_v++;
+        else
+        {
+            advance(it, el);
+            it->setCondition(conditions::closed);
+            it_v++;
+        }
     }
     it_v = v7->begin();
     for (auto& el : *v7)
     {
         it = arrayCard->begin();
-        if (it_v++ != v7->end())
-        {
-            advance(it, el);
-            it->setCondition(conditions::closed);
-        }
-        else
+        if (it_v == v7->end() - 1)
         {
             advance(it, el);
             it->setCondition(conditions::open);
         }
-        it_v++;
+        else
+        {
+            advance(it, el);
+            it->setCondition(conditions::closed);
+            it_v++;
+        }
     }
     for (auto& el : *arrayCard)
     {
         if (el.getCondition() == conditions::none)
         {
             el.setCondition(conditions::is_shop);
+        }
+    }
+}
+inline void draw_cols(RenderWindow& window, Sprite& closed_card, vector<Card>& arr, vector<Sprite>& sprite, vector<int>& v1, vector<int>& v2, vector<int>& v3, vector<int>& v4, vector<int>& v5, vector<int>& v6, vector<int>& v7)
+{
+    for (auto& el : v1)
+    {
+        if (arr[el].getCondition() == conditions::closed)
+        {
+            closed_card.setPosition(sprite[el].getPosition());
+            window.draw(closed_card);
+        }
+        else if (arr[el].getCondition() == conditions::open)
+        {
+            window.draw(sprite[el]);
+        }
+    }
+    for (auto& el : v2)
+    {
+        if (arr[el].getCondition() == conditions::closed)
+        {
+            closed_card.setPosition(sprite[el].getPosition());
+            window.draw(closed_card);
+        }
+        else if (arr[el].getCondition() == conditions::open)
+        {
+            window.draw(sprite[el]);
+        }
+    }
+    for (auto& el : v3)
+    {
+        if (arr[el].getCondition() == conditions::closed)
+        {
+            closed_card.setPosition(sprite[el].getPosition());
+            window.draw(closed_card);
+        }
+        else if (arr[el].getCondition() == conditions::open)
+        {
+            window.draw(sprite[el]);
+        }
+    }
+    for (auto& el : v4)
+    {
+        if (arr[el].getCondition() == conditions::closed)
+        {
+            closed_card.setPosition(sprite[el].getPosition());
+            window.draw(closed_card);
+        }
+        else if (arr[el].getCondition() == conditions::open)
+        {
+            window.draw(sprite[el]);
+        }
+    }
+    for (auto& el : v5)
+    {
+        if (arr[el].getCondition() == conditions::closed)
+        {
+            closed_card.setPosition(sprite[el].getPosition());
+            window.draw(closed_card);
+        }
+        else if (arr[el].getCondition() == conditions::open)
+        {
+            window.draw(sprite[el]);
+        }
+    }
+    for (auto& el : v6)
+    {
+        if (arr[el].getCondition() == conditions::closed)
+        {
+            closed_card.setPosition(sprite[el].getPosition());
+            window.draw(closed_card);
+        }
+        else if (arr[el].getCondition() == conditions::open)
+        {
+            window.draw(sprite[el]);
+        }
+    }
+    for (auto& el : v7)
+    {
+        if (arr[el].getCondition() == conditions::closed)
+        {
+            closed_card.setPosition(sprite[el].getPosition());
+            window.draw(closed_card);
+        }
+        else if (arr[el].getCondition() == conditions::open)
+        {
+            window.draw(sprite[el]);
+        }
+    }
+}
+inline vector<int>& getVector(int value, vector<int>& v1, vector<int>& v2, vector<int>& v3, vector<int>& v4, vector<int>& v5, vector<int>& v6, vector<int>& v7)
+{
+    bool check = false;
+    for (auto& el : v1)
+    {
+        if (el == value)
+        {
+            check = true;
+        }
+        if (check)
+        {
+            return v1;
+        }
+    }
+    for (auto& el : v2)
+    {
+        if (el == value)
+        {
+            check = true;
+        }
+        if (check)
+        {
+            return v2;
+        }
+    }
+    for (auto& el : v3)
+    {
+        if (el == value)
+        {
+            check = true;
+        }
+        if (check)
+        {
+            return v3;
+        }
+    }
+    for (auto& el : v4)
+    {
+        if (el == value)
+        {
+            check = true;
+        }
+        if (check)
+        {
+            return v4;
+        }
+    }
+    for (auto& el : v5)
+    {
+        if (el == value)
+        {
+            check = true;
+        }
+        if (check)
+        {
+            return v5;
+        }
+    }
+    for (auto& el : v6)
+    {
+        if (el == value)
+        {
+            check = true;
+        }
+        if (check)
+        {
+            return v6;
+        }
+    }
+    for (auto& el : v7)
+    {
+        if (el == value)
+        {
+            check = true;
+        }
+        if (check)
+        {
+            return v7;
         }
     }
 }
