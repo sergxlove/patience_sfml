@@ -1,4 +1,3 @@
 # patience_sfml
-sergxlove 
-
+sergxlove
 developer sergxlove
