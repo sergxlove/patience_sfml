@@ -218,6 +218,7 @@ Card::Card(int index, int mast, int color, float pozitionX, float pozitionY, int
     this->users = false;
     this->condition = conditions::none;
 }
+
 Card::Card()
 {
     this->index = 0;
