@@ -38,6 +38,7 @@ public:
     void setNumber(int number);//передача порядкового номера
     void setUsers(bool users);//передача использования карты
     void setCondition(int condition);//передача состояния карты
+    void setNumberCols(int number_cols);
     int getIndex();//возврат нидекса
     int getMast();//возврат масти
     int getColor();//возврат цвета
@@ -46,6 +47,7 @@ public:
     int getNumber();//возврат порядкового номера
     bool getUsers();//возврат использования карты
     int getCondition();//возврат состояния карты
+    int getNumberCols();
 private:
     int index;//индекс карты
     int mast;//масть карты
@@ -55,6 +57,7 @@ private:
     int number;//порядковый номер элемента
     bool users;//использование карты
     int condition;//состояние карты
+    int number_cols;//номер колонки в которой находится карта
 };
 class fielding
 {
@@ -65,6 +68,7 @@ public:
     vector<int>field_array_shop(vector<Card>& check);
     vector<Sprite> field_array_sprite(Texture* texture, vector<Card>& arrayCard);
     void field_conditions(vector<Card>& arrayCard, vector<int>& v1, vector<int>& v2, vector<int>& v3, vector<int>& v4, vector<int>& v5, vector<int>& v6, vector<int>& v7, vector<int>& slot_v1, vector<int>& slot_v2, vector<int>& slot_v3, vector<int>& slot_v4, vector<int>& shop_arr);
+    void field_number_cols(vector<Card>& arrayCard, vector<int>& v1, vector<int>& v2, vector<int>& v3, vector<int>& v4, vector<int>& v5, vector<int>& v6, vector<int>& v7);
 };
 class drawing
 {
@@ -78,6 +82,11 @@ class return_ref
 public: 
     vector<int>& get_ref(vector<int>& v1, vector<int>& v2, vector<int>& v3, vector<int>& v4, vector<int>& v5, vector<int>& v6, vector<int>& v7, int poz);
 };
+class change_vectors
+{
+public:
+    void swaps_card(vector<int>& first_v, vector<int>& last_v, vector<Card>& arr, vector<Sprite>& arr_spr, int cols);
+};
 int main()
 {
 	srand(time(NULL));
@@ -86,6 +95,7 @@ int main()
     fielding f;
     drawing d;
     return_ref r;
+    change_vectors c;
     Image all_card;
     Image back_image;
     all_card.loadFromFile("images/cards.png");
@@ -101,7 +111,7 @@ int main()
     shop_spr.setScale(0.8f, 0.8f);
     Sprite closed_card;//иконка закрытой карты
     closed_card.setTexture(texture_cards);
-    closed_card.setTextureRect(IntRect(2160, 482, 164, 50));
+    closed_card.setTextureRect(IntRect(2160, 482, 164, 60));
     closed_card.setScale(0.8f, 0.8f);
     Sprite back_spr;
     back_spr.setTexture(texture_back_image);
@@ -136,8 +146,11 @@ int main()
     float start_y = 0.0f;
     bool return_sprite = false;
     bool collission = false;
+    int current_cols = 0;
+    int future_cols = 0;
     random_shuffle(arr_shop.begin(), arr_shop.end());
     f.field_conditions(arrayCard, cols_v1, cols_v2, cols_v3, cols_v4, cols_v5, cols_v6, cols_v7, slot_v1, slot_v2, slot_v3, slot_v4, arr_shop);
+    f.field_number_cols(arrayCard, cols_v1, cols_v2, cols_v3, cols_v4, cols_v5, cols_v6, cols_v7);
     while (window.isOpen())
     {
         Event event;
@@ -166,7 +179,8 @@ int main()
                                 start_y = arr_sprites[i].getPosition().y;
                                 cout << "x = " << Mouse::getPosition(window).x << " y = " << Mouse::getPosition(window).y << " i = " << i << endl;
                                 return_sprite = false;
-                                //ref_col = r.get_ref(cols_v1, cols_v2, cols_v3, cols_v4, cols_v5, cols_v6, cols_v7, i);
+                                current_cols = arrayCard[i].getNumberCols();
+                                cout << "cols = " << current_cols << endl;
                                 break;
                             }
                         }
@@ -186,9 +200,19 @@ int main()
                             }
                             if (arr_sprites[i].getGlobalBounds().contains(arr_sprites[dragging_index].getPosition().x, arr_sprites[dragging_index].getPosition().y) || arr_sprites[i].getGlobalBounds().contains(arr_sprites[dragging_index].getPosition().x + 164.2, arr_sprites[dragging_index].getPosition().y))
                             {
-                                collission = true;
-                                cout << "collission" << endl;
-                                break;
+                                future_cols = arrayCard[i].getNumberCols();
+                                if (future_cols != current_cols)
+                                {
+                                    collission = true;
+                                    cout << "collision" << endl;
+                                    cout << "cols collision = " << future_cols << endl;
+                                    break;
+                                }
+                                else
+                                {
+                                    collission = false;
+                                    cout << "edentifity cols" << endl;
+                                }
                             }
                             else
                             {
@@ -198,6 +222,7 @@ int main()
                         if (collission)
                         {
                             return_sprite = false;
+                            c.swaps_card(r.get_ref(cols_v1, cols_v2, cols_v3, cols_v4, cols_v5, cols_v6, cols_v7, current_cols), r.get_ref(cols_v1, cols_v2, cols_v3, cols_v4, cols_v5, cols_v6, cols_v7, future_cols), arrayCard,arr_sprites, future_cols);
                         }
                         else
                         {
@@ -252,6 +277,7 @@ Card::Card(int index, int mast, int color, float pozitionX, float pozitionY, int
     this->number = number;
     this->users = false;
     this->condition = conditions::none;
+    this->number_cols = 0;
 }
 
 Card::Card()
@@ -264,6 +290,7 @@ Card::Card()
     this->number = 0;
     this->users = false;
     this->condition = conditions::none;
+    this->number_cols = 0;
 }
 void Card::setIndex(int index)
 {
@@ -293,6 +320,10 @@ void Card::setUsers(bool users)
 void Card::setCondition(int condition)
 {
     this->condition = condition;
+}
+void Card::setNumberCols(int number_cols)
+{
+    this->number_cols = number_cols;
 }
 int Card::getIndex()
 {
@@ -325,6 +356,11 @@ bool Card::getUsers()
 int Card::getCondition()
 {
     return condition;
+}
+
+int Card::getNumberCols()
+{
+    return number_cols;
 }
 
 vector<Card> fielding::fieldArray()
@@ -604,6 +640,42 @@ void fielding::field_conditions(vector<Card>& arrayCard, vector<int>& v1, vector
     }
 }
 
+void fielding::field_number_cols(vector<Card>& arrayCard, vector<int>& v1, vector<int>& v2, vector<int>& v3, vector<int>& v4, vector<int>& v5, vector<int>& v6, vector<int>& v7)
+{
+    for (auto& el : arrayCard)
+    {
+        el.setNumberCols(0);
+    }
+    for (auto& el : v1)
+    {
+        arrayCard[el].setNumberCols(1);
+    }
+    for (auto& el : v2)
+    {
+        arrayCard[el].setNumberCols(2);
+    }
+    for (auto& el : v3)
+    {
+        arrayCard[el].setNumberCols(3);
+    }
+    for (auto& el : v4)
+    {
+        arrayCard[el].setNumberCols(4);
+    }
+    for (auto& el : v5)
+    {
+        arrayCard[el].setNumberCols(5);
+    }
+    for (auto& el : v6)
+    {
+        arrayCard[el].setNumberCols(6);
+    }
+    for (auto& el : v7)
+    {
+        arrayCard[el].setNumberCols(7);
+    }
+}
+
 void drawing::first_draw_all_cols(RenderWindow& window, Sprite& closed_card, vector<Card>& arr, vector<Sprite>& sprite, vector<int>& v1, vector<int>& v2, vector<int>& v3, vector<int>& v4, vector<int>& v5, vector<int>& v6, vector<int>& v7)
 {
     float total_x = 200.0f;
@@ -824,54 +896,43 @@ void drawing::draw_cols(RenderWindow& window, Sprite& closed_card, vector<Card>&
 
 vector<int>& return_ref::get_ref(vector<int>& v1, vector<int>& v2, vector<int>& v3, vector<int>& v4, vector<int>& v5, vector<int>& v6, vector<int>& v7, int poz)
 {
-    for (auto& el : v1)
+    switch (poz)
     {
-        if (el == poz)
-        {
-            return v1;
-        }
+    case 1:
+        return v1;
+        break;
+    case 2:
+        return v2;
+        break;
+    case 3:
+        return v3;
+        break;
+    case 4:
+        return v4;
+        break;
+    case 5:
+        return v5;
+        break;
+    case 6:
+        return v6;
+        break;
+    case 7:
+        return v7;
+        break;
+    default:
+        return v1;
+        break;
     }
-    for (auto& el : v2)
+}
+
+void change_vectors::swaps_card(vector<int>& first_v, vector<int>& last_v, vector<Card>& arr, vector<Sprite>& arr_spr, int cols)
+{
+    last_v.push_back(first_v[first_v.size() - 1]);
+    arr[first_v[first_v.size() - 1]].setNumberCols(cols);
+    first_v.erase(first_v.begin() + (first_v.size() - 1));
+    if (first_v.size() != 0)
     {
-        if (el == poz)
-        {
-            return v2;
-        }
+        arr[first_v[first_v.size() - 1]].setCondition(conditions::open);
     }
-    for (auto& el : v3)
-    {
-        if (el == poz)
-        {
-            return v3;
-        }
-    }
-    for (auto& el : v4)
-    {
-        if (el == poz)
-        {
-            return v4;
-        }
-    }
-    for (auto& el : v5)
-    {
-        if (el == poz)
-        {
-            return v5;
-        }
-    }
-    for (auto& el : v6)
-    {
-        if (el == poz)
-        {
-            return v6;
-        }
-    }
-    for (auto& el : v7)
-    {
-        if (el == poz)
-        {
-            return v7;
-        }
-    }
-    return v1;
+    arr_spr[last_v[last_v.size()-1]].setPosition(200.0f * cols, 300.0f + (50.0f * (last_v.size() - 1)));
 }
