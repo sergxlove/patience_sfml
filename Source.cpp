@@ -132,6 +132,8 @@ int main()
     vector<int> slot_v4;//четвертый слот карт
     vector<int> arr_shop = f.field_array_shop(arrayCard);//массив карт в магазине
     vector<Sprite> arr_sprites = f.field_array_sprite(&texture_cards, arrayCard);//массив для отрисовки карт
+    int count_arr_shop = 0;
+    bool draw_arr_shop = false;
     bool first_start = true;
     bool draging = false;
     int dragging_index = 0;
@@ -148,6 +150,7 @@ int main()
     bool collission = false;
     int current_cols = 0;
     int future_cols = 0;
+    bool click_card = false;
     random_shuffle(arr_shop.begin(), arr_shop.end());
     f.field_conditions(arrayCard, cols_v1, cols_v2, cols_v3, cols_v4, cols_v5, cols_v6, cols_v7, slot_v1, slot_v2, slot_v3, slot_v4, arr_shop);
     f.field_number_cols(arrayCard, cols_v1, cols_v2, cols_v3, cols_v4, cols_v5, cols_v6, cols_v7);
@@ -166,6 +169,21 @@ int main()
                 {
                     if (event.mouseButton.button == Mouse::Left)
                     {
+                        if (shop_spr.getGlobalBounds().contains(Mouse::getPosition(window).x, Mouse::getPosition(window).y))
+                        {
+                            if (draw_arr_shop)
+                            {
+                                ++count_arr_shop;
+                                if (count_arr_shop == arr_shop.size())
+                                {
+                                    count_arr_shop = 0;
+                                }
+                            }
+                            else
+                            {
+                                draw_arr_shop = true;
+                            }
+                        }
                         for (int i = 0;i < arr_sprites.size();i++)
                         {
                             if (arr_sprites[i].getGlobalBounds().contains(Mouse::getPosition(window).x, Mouse::getPosition(window).y) && arrayCard[i].getCondition() == conditions::open)
@@ -180,6 +198,7 @@ int main()
                                 cout << "x = " << Mouse::getPosition(window).x << " y = " << Mouse::getPosition(window).y << " i = " << i << endl;
                                 return_sprite = false;
                                 current_cols = arrayCard[i].getNumberCols();
+                                click_card = true;
                                 cout << "cols = " << current_cols << endl;
                                 break;
                             }
@@ -190,48 +209,52 @@ int main()
                 {
                     if (event.mouseButton.button == Mouse::Left)
                     {
-                        cout << "released button x = " << event.mouseButton.x << " y = " << event.mouseButton.y << endl;
-                        draging = false;
-                        for (int i = 0;i < arr_sprites.size();i++)
+                        if (click_card)
                         {
-                            if (i == dragging_index)
+                            click_card = false;
+                            cout << "released button x = " << event.mouseButton.x << " y = " << event.mouseButton.y << endl;
+                            draging = false;
+                            for (int i = 0;i < arr_sprites.size();i++)
                             {
-                                continue;
-                            }
-                            if (arr_sprites[i].getGlobalBounds().contains(arr_sprites[dragging_index].getPosition().x, arr_sprites[dragging_index].getPosition().y) || arr_sprites[i].getGlobalBounds().contains(arr_sprites[dragging_index].getPosition().x + 164.2, arr_sprites[dragging_index].getPosition().y))
-                            {
-                                future_cols = arrayCard[i].getNumberCols();
-                                if (future_cols != current_cols)
+                                if (i == dragging_index)
                                 {
-                                    collission = true;
-                                    cout << "collision" << endl;
-                                    cout << "cols collision = " << future_cols << endl;
-                                    break;
+                                    continue;
+                                }
+                                if (arr_sprites[i].getGlobalBounds().contains(arr_sprites[dragging_index].getPosition().x, arr_sprites[dragging_index].getPosition().y) || arr_sprites[i].getGlobalBounds().contains(arr_sprites[dragging_index].getPosition().x + 164.2, arr_sprites[dragging_index].getPosition().y))
+                                {
+                                    future_cols = arrayCard[i].getNumberCols();
+                                    if (future_cols != current_cols)
+                                    {
+                                        collission = true;
+                                        cout << "collision" << endl;
+                                        cout << "cols collision = " << future_cols << endl;
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        collission = false;
+                                        cout << "edentifity cols" << endl;
+                                    }
                                 }
                                 else
                                 {
                                     collission = false;
-                                    cout << "edentifity cols" << endl;
                                 }
+                            }
+                            if (collission)
+                            {
+                                return_sprite = false;
+                                c.swaps_card(r.get_ref(cols_v1, cols_v2, cols_v3, cols_v4, cols_v5, cols_v6, cols_v7, current_cols), r.get_ref(cols_v1, cols_v2, cols_v3, cols_v4, cols_v5, cols_v6, cols_v7, future_cols), arrayCard,arr_sprites, future_cols);
                             }
                             else
                             {
-                                collission = false;
+                                total_step_x = arr_sprites[dragging_index].getPosition().x - start_x;
+                                total_step_y = arr_sprites[dragging_index].getPosition().y - start_y;
+                                step_x = total_step_x / 10;
+                                step_y = total_step_y / 10;
+                                count = 0;
+                                return_sprite = true;
                             }
-                        }
-                        if (collission)
-                        {
-                            return_sprite = false;
-                            c.swaps_card(r.get_ref(cols_v1, cols_v2, cols_v3, cols_v4, cols_v5, cols_v6, cols_v7, current_cols), r.get_ref(cols_v1, cols_v2, cols_v3, cols_v4, cols_v5, cols_v6, cols_v7, future_cols), arrayCard,arr_sprites, future_cols);
-                        }
-                        else
-                        {
-                            total_step_x = arr_sprites[dragging_index].getPosition().x - start_x;
-                            total_step_y = arr_sprites[dragging_index].getPosition().y - start_y;
-                            step_x = total_step_x / 10;
-                            step_y = total_step_y / 10;
-                            count = 0;
-                            return_sprite = true;
                         }
                     }
                 }
@@ -260,6 +283,14 @@ int main()
             else
             {
                 d.draw_cols(window, closed_card, arrayCard, arr_sprites, cols_v1, cols_v2, cols_v3, cols_v4, cols_v5, cols_v6, cols_v7);
+            }
+            if (draw_arr_shop)
+            {
+                window.draw(arr_sprites[arr_shop[count_arr_shop]]);
+            }
+            if (draging)
+            {
+                window.draw(arr_sprites[dragging_index]);
             }
             window.display();
             clock.restart();
