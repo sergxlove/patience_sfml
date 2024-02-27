@@ -8,6 +8,7 @@ using namespace std;
 using namespace sf;
 enum masts
 {
+    no_mast,
     hearts,
     cross,
     booby,
@@ -15,6 +16,7 @@ enum masts
 };
 enum colors
 {
+    no_colors,
     red,
     black
 };
@@ -59,6 +61,16 @@ private:
     int condition;//состояние карты
     int number_cols;//номер колонки в которой находится карта
 };
+class slot
+{
+public:
+    vector<int>& get_slot();
+    bool add(int value,int index, int mast);
+private:
+    vector<int> slot_card;
+    int mast = masts::no_mast;
+    int index = 0;
+};
 class fielding
 {
 public:
@@ -75,17 +87,22 @@ class drawing
 public:
     void first_draw_all_cols(RenderWindow& window, Sprite& closed_card, vector<Card>& arr, vector<Sprite>& sprite, vector<int>& v1, vector<int>& v2, vector<int>& v3, vector<int>& v4, vector<int>& v5, vector<int>& v6, vector<int>& v7);
     void draw_cols(RenderWindow& window, Sprite& closed_card, vector<Card>& arr, vector<Sprite>& sprite, vector<int>& v1, vector<int>& v2, vector<int>& v3, vector<int>& v4, vector<int>& v5, vector<int>& v6, vector<int>& v7);
+    void draw_slots(RenderWindow& window, vector<Card>& arr, vector<Sprite>& sprite, vector<int>& slot_1, vector<int>& slot_2, vector<int>& slot_3, vector<int>& slot_4);
 
 };
 class return_ref
 {
 public: 
     vector<int>& get_ref(vector<int>& v1, vector<int>& v2, vector<int>& v3, vector<int>& v4, vector<int>& v5, vector<int>& v6, vector<int>& v7, int poz);
+    vector<int>& get_ref_slot(vector<int>& slot_1, vector<int>& slot_2, vector<int>& slot_3, vector<int>& slot_4, int poz);
+    slot get_ref_slot(slot& slot_1, slot& slot_2, slot& slot_3, slot& slot_4, int poz);
 };
 class change_vectors
 {
 public:
     void swaps_card(vector<int>& first_v, vector<int>& last_v, vector<Card>& arr, vector<Sprite>& arr_spr, int cols);
+    //void swaps_card_on_slot(vector<int>& first_v, vector<int>& last_v, vector<Card>& arr, vector<Sprite>& arr_spr, int slots);
+    bool swaps_card_on_slot(vector<int>& first_v, slot& last_v, vector<Card>& arr, vector<Sprite>& arr_spr, int slots);
 };
 int main()
 {
@@ -126,10 +143,10 @@ int main()
     vector<int> cols_v5 = f.field_cols(arrayCard, 5);//пятый столбец карт
     vector<int> cols_v6 = f.field_cols(arrayCard, 6);//шестой столбец карт 
     vector<int> cols_v7 = f.field_cols(arrayCard, 7);//седьмой столбец карт
-    vector<int> slot_v1;//первый слот карт
-    vector<int> slot_v2;//второй слот карт
-    vector<int> slot_v3;//третий слот карт
-    vector<int> slot_v4;//четвертый слот карт
+    slot slot_v1;
+    slot slot_v2;
+    slot slot_v3;
+    slot slot_v4;
     vector<int> arr_shop = f.field_array_shop(arrayCard);//массив карт в магазине
     vector<Sprite> arr_sprites = f.field_array_sprite(&texture_cards, arrayCard);//массив для отрисовки карт
     int count_arr_shop = 0;
@@ -152,7 +169,7 @@ int main()
     int future_cols = 0;
     bool click_card = false;
     random_shuffle(arr_shop.begin(), arr_shop.end());
-    f.field_conditions(arrayCard, cols_v1, cols_v2, cols_v3, cols_v4, cols_v5, cols_v6, cols_v7, slot_v1, slot_v2, slot_v3, slot_v4, arr_shop);
+    f.field_conditions(arrayCard, cols_v1, cols_v2, cols_v3, cols_v4, cols_v5, cols_v6, cols_v7, slot_v1.get_slot(), slot_v2.get_slot(), slot_v3.get_slot(), slot_v4.get_slot(), arr_shop);
     f.field_number_cols(arrayCard, cols_v1, cols_v2, cols_v3, cols_v4, cols_v5, cols_v6, cols_v7);
     while (window.isOpen())
     {
@@ -188,17 +205,17 @@ int main()
                         {
                             if (arr_sprites[i].getGlobalBounds().contains(Mouse::getPosition(window).x, Mouse::getPosition(window).y) && arrayCard[i].getCondition() == conditions::open)
                             {
-                                cout << "x = " << event.mouseButton.x << " y = " << event.mouseButton.y << " i = " << i << endl;
                                 dragging_index = i;
                                 draging = true;
                                 dx = Mouse::getPosition(window).x - arr_sprites[i].getPosition().x;
                                 dy = Mouse::getPosition(window).y - arr_sprites[i].getPosition().y;
                                 start_x = arr_sprites[i].getPosition().x;
                                 start_y = arr_sprites[i].getPosition().y;
-                                cout << "x = " << Mouse::getPosition(window).x << " y = " << Mouse::getPosition(window).y << " i = " << i << endl;
                                 return_sprite = false;
                                 current_cols = arrayCard[i].getNumberCols();
                                 click_card = true;
+                                cout << "x = " << event.mouseButton.x << " y = " << event.mouseButton.y << " i = " << i << endl;
+                                cout << "x = " << Mouse::getPosition(window).x << " y = " << Mouse::getPosition(window).y << " i = " << i << endl;
                                 cout << "cols = " << current_cols << endl;
                                 break;
                             }
@@ -220,7 +237,7 @@ int main()
                                 {
                                     continue;
                                 }
-                                if (arr_sprites[i].getGlobalBounds().contains(arr_sprites[dragging_index].getPosition().x, arr_sprites[dragging_index].getPosition().y) || arr_sprites[i].getGlobalBounds().contains(arr_sprites[dragging_index].getPosition().x + 164.2, arr_sprites[dragging_index].getPosition().y))
+                                if (arrayCard[i].getCondition() == conditions::open && (arr_sprites[i].getGlobalBounds().contains(arr_sprites[dragging_index].getPosition().x, arr_sprites[dragging_index].getPosition().y) || arr_sprites[i].getGlobalBounds().contains(arr_sprites[dragging_index].getPosition().x + 164.2, arr_sprites[dragging_index].getPosition().y)))
                                 {
                                     future_cols = arrayCard[i].getNumberCols();
                                     if (future_cols != current_cols)
@@ -255,6 +272,19 @@ int main()
                                 count = 0;
                                 return_sprite = true;
                             }
+                            for (int i = 0;i < slot_for_card.size();i++)
+                            {
+                                if (slot_for_card[i].getGlobalBounds().contains(arr_sprites[dragging_index].getPosition().x, arr_sprites[dragging_index].getPosition().y) || slot_for_card[i].getGlobalBounds().contains(arr_sprites[dragging_index].getPosition().x +164.2, arr_sprites[dragging_index].getPosition().y))
+                                {
+                                    cout << "collision slots" << endl;
+                                    //return_sprite = false;
+                                    //c.swaps_card_on_slot(r.get_ref(cols_v1, cols_v2, cols_v3, cols_v4, cols_v5, cols_v6, cols_v7, current_cols), r.get_ref_slot(slot_v1.get_slot(), slot_v2.get_slot(), slot_v3.get_slot(), slot_v4.get_slot(), i), arrayCard, arr_sprites, i);
+                                    if (c.swaps_card_on_slot(r.get_ref(cols_v1, cols_v2, cols_v3, cols_v4, cols_v5, cols_v6, cols_v7, current_cols), r.get_ref_slot(slot_v1, slot_v2, slot_v3, slot_v4, i), arrayCard, arr_sprites, i))
+                                    {
+
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -288,6 +318,7 @@ int main()
             {
                 window.draw(arr_sprites[arr_shop[count_arr_shop]]);
             }
+            d.draw_slots(window, arrayCard, arr_sprites, slot_v1.get_slot(), slot_v2.get_slot(), slot_v3.get_slot(), slot_v4.get_slot());
             if (draging)
             {
                 window.draw(arr_sprites[dragging_index]);
@@ -925,6 +956,26 @@ void drawing::draw_cols(RenderWindow& window, Sprite& closed_card, vector<Card>&
     }
 }
 
+void drawing::draw_slots(RenderWindow& window, vector<Card>& arr, vector<Sprite>& sprite, vector<int>& slot_1, vector<int>& slot_2, vector<int>& slot_3, vector<int>& slot_4)
+{
+    if (!slot_1.empty())
+    {
+        window.draw(sprite[slot_1[slot_1.size() - 1]]);
+    }
+    if (!slot_2.empty())
+    {
+        window.draw(sprite[slot_2[slot_2.size() - 1]]);
+    }
+    if (!slot_3.empty())
+    {
+        window.draw(sprite[slot_3[slot_3.size() - 1]]);
+    }
+    if (!slot_4.empty())
+    {
+        window.draw(sprite[slot_4[slot_4.size() - 1]]);
+    }
+}
+
 vector<int>& return_ref::get_ref(vector<int>& v1, vector<int>& v2, vector<int>& v3, vector<int>& v4, vector<int>& v5, vector<int>& v6, vector<int>& v7, int poz)
 {
     switch (poz)
@@ -956,6 +1007,50 @@ vector<int>& return_ref::get_ref(vector<int>& v1, vector<int>& v2, vector<int>& 
     }
 }
 
+vector<int>& return_ref::get_ref_slot(vector<int>& slot_1, vector<int>& slot_2, vector<int>& slot_3, vector<int>& slot_4, int poz)
+{
+    switch (poz)
+    {
+    case 0:
+        return slot_1;
+        break;
+    case 1:
+        return slot_2;
+        break;
+    case 2:
+        return slot_3;
+        break;
+    case 3:
+        return slot_4;
+        break;
+    default:
+        return slot_1;
+        break;
+    }
+}
+
+slot return_ref::get_ref_slot(slot& slot_1, slot& slot_2, slot& slot_3, slot& slot_4, int poz)
+{
+    switch (poz)
+    {
+    case 0:
+        return slot_1;
+        break;
+    case 1:
+        return slot_2;
+        break;
+    case 2:
+        return slot_3;
+        break;
+    case 3:
+        return slot_4;
+        break;
+    default:
+        return slot_1;
+        break;
+    }
+}
+
 void change_vectors::swaps_card(vector<int>& first_v, vector<int>& last_v, vector<Card>& arr, vector<Sprite>& arr_spr, int cols)
 {
     last_v.push_back(first_v[first_v.size() - 1]);
@@ -966,4 +1061,55 @@ void change_vectors::swaps_card(vector<int>& first_v, vector<int>& last_v, vecto
         arr[first_v[first_v.size() - 1]].setCondition(conditions::open);
     }
     arr_spr[last_v[last_v.size()-1]].setPosition(200.0f * cols, 300.0f + (50.0f * (last_v.size() - 1)));
+}
+
+/*void change_vectors::swaps_card_on_slot(vector<int>& first_v, vector<int>& last_v, vector<Card>& arr, vector<Sprite>& arr_spr, int slots)
+{
+    last_v.push_back(first_v[first_v.size() - 1]);
+    arr[last_v[last_v.size() - 1]].setCondition(conditions::is_slot);
+    arr_spr[last_v[last_v.size() - 1]].setPosition(500.0f + (170 * slots), 50.0f);
+    arr[first_v[first_v.size() - 1]].setNumberCols(0);
+    first_v.erase(first_v.begin() + (first_v.size() - 1));
+    if (first_v.size() != 0)
+    {
+        arr[first_v[first_v.size() - 1]].setCondition(conditions::open);
+    }
+}*/
+
+bool change_vectors::swaps_card_on_slot(vector<int>& first_v, slot& last_v, vector<Card>& arr, vector<Sprite>& arr_spr, int slots)
+{
+    if (last_v.add(first_v[first_v.size() - 1], arr[first_v[first_v.size() - 1]].getIndex(), arr[first_v[first_v.size() - 1]].getMast()))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+vector<int>& slot::get_slot()
+{
+    return slot_card; 
+}
+
+bool slot::add(int value, int index, int mast)
+{
+    if (this->mast == masts::no_mast && this->index == index)
+    {
+        this->mast = mast;
+        this->index++;
+        slot_card.push_back(value);
+        return true;
+    }
+    if (this->mast == mast&&this->index == index)
+    {
+        this->index++;
+        slot_card.push_back(value);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
