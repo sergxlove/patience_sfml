@@ -66,6 +66,7 @@ class slot
 public:
     vector<int>& get_slot();
     bool add(int value,int index, int mast);
+    int top();
 private:
     vector<int> slot_card;
     int mast = masts::no_mast;
@@ -95,13 +96,12 @@ class return_ref
 public: 
     vector<int>& get_ref(vector<int>& v1, vector<int>& v2, vector<int>& v3, vector<int>& v4, vector<int>& v5, vector<int>& v6, vector<int>& v7, int poz);
     vector<int>& get_ref_slot(vector<int>& slot_1, vector<int>& slot_2, vector<int>& slot_3, vector<int>& slot_4, int poz);
-    slot get_ref_slot(slot& slot_1, slot& slot_2, slot& slot_3, slot& slot_4, int poz);
+    slot& get_ref_slot(slot& slot_1, slot& slot_2, slot& slot_3, slot& slot_4, int poz);
 };
 class change_vectors
 {
 public:
     void swaps_card(vector<int>& first_v, vector<int>& last_v, vector<Card>& arr, vector<Sprite>& arr_spr, int cols);
-    //void swaps_card_on_slot(vector<int>& first_v, vector<int>& last_v, vector<Card>& arr, vector<Sprite>& arr_spr, int slots);
     bool swaps_card_on_slot(vector<int>& first_v, slot& last_v, vector<Card>& arr, vector<Sprite>& arr_spr, int slots);
 };
 int main()
@@ -168,6 +168,7 @@ int main()
     int current_cols = 0;
     int future_cols = 0;
     bool click_card = false;
+    bool click_card_shop = false;
     random_shuffle(arr_shop.begin(), arr_shop.end());
     f.field_conditions(arrayCard, cols_v1, cols_v2, cols_v3, cols_v4, cols_v5, cols_v6, cols_v7, slot_v1.get_slot(), slot_v2.get_slot(), slot_v3.get_slot(), slot_v4.get_slot(), arr_shop);
     f.field_number_cols(arrayCard, cols_v1, cols_v2, cols_v3, cols_v4, cols_v5, cols_v6, cols_v7);
@@ -201,23 +202,40 @@ int main()
                                 draw_arr_shop = true;
                             }
                         }
-                        for (int i = 0;i < arr_sprites.size();i++)
+                        else
                         {
-                            if (arr_sprites[i].getGlobalBounds().contains(Mouse::getPosition(window).x, Mouse::getPosition(window).y) && arrayCard[i].getCondition() == conditions::open)
+                            if (arr_sprites[arr_shop[count_arr_shop]].getGlobalBounds().contains(Mouse::getPosition(window).x, Mouse::getPosition(window).y))
                             {
-                                dragging_index = i;
+                                dragging_index = arr_shop[count_arr_shop];
                                 draging = true;
-                                dx = Mouse::getPosition(window).x - arr_sprites[i].getPosition().x;
-                                dy = Mouse::getPosition(window).y - arr_sprites[i].getPosition().y;
-                                start_x = arr_sprites[i].getPosition().x;
-                                start_y = arr_sprites[i].getPosition().y;
+                                click_card_shop = true;
+                                dx = Mouse::getPosition(window).x - arr_sprites[dragging_index].getPosition().x;
+                                dy = Mouse::getPosition(window).y - arr_sprites[dragging_index].getPosition().y;
+                                start_x = arr_sprites[dragging_index].getPosition().x;
+                                start_y = arr_sprites[dragging_index].getPosition().y;
                                 return_sprite = false;
-                                current_cols = arrayCard[i].getNumberCols();
-                                click_card = true;
-                                cout << "x = " << event.mouseButton.x << " y = " << event.mouseButton.y << " i = " << i << endl;
-                                cout << "x = " << Mouse::getPosition(window).x << " y = " << Mouse::getPosition(window).y << " i = " << i << endl;
-                                cout << "cols = " << current_cols << endl;
-                                break;
+                            }
+                        }
+                        if (draging == false)
+                        {
+                            for (int i = 0;i < arr_sprites.size();i++)
+                            {
+                                if (arr_sprites[i].getGlobalBounds().contains(Mouse::getPosition(window).x, Mouse::getPosition(window).y) && arrayCard[i].getCondition() == conditions::open)
+                                {
+                                     dragging_index = i;
+                                     draging = true;
+                                     dx = Mouse::getPosition(window).x - arr_sprites[i].getPosition().x;
+                                     dy = Mouse::getPosition(window).y - arr_sprites[i].getPosition().y;
+                                     start_x = arr_sprites[i].getPosition().x;
+                                     start_y = arr_sprites[i].getPosition().y;
+                                     return_sprite = false;
+                                     current_cols = arrayCard[i].getNumberCols();
+                                     click_card = true;
+                                     cout << "x = " << event.mouseButton.x << " y = " << event.mouseButton.y << " i = " << i << endl;
+                                     cout << "x = " << Mouse::getPosition(window).x << " y = " << Mouse::getPosition(window).y << " i = " << i << endl;
+                                     cout << "cols = " << current_cols << endl;
+                                     break;
+                                }
                             }
                         }
                     }
@@ -228,6 +246,21 @@ int main()
                     {
                         if (click_card)
                         {
+                            for (int i = 0;i < slot_for_card.size();i++)
+                            {
+                                if (slot_for_card[i].getGlobalBounds().contains(arr_sprites[dragging_index].getPosition().x, arr_sprites[dragging_index].getPosition().y) || slot_for_card[i].getGlobalBounds().contains(arr_sprites[dragging_index].getPosition().x + 164.2, arr_sprites[dragging_index].getPosition().y))
+                                {
+                                    cout << "collision slots" << endl;
+                                    if (c.swaps_card_on_slot(r.get_ref(cols_v1, cols_v2, cols_v3, cols_v4, cols_v5, cols_v6, cols_v7, current_cols), r.get_ref_slot(slot_v1, slot_v2, slot_v3, slot_v4, i), arrayCard, arr_sprites, i))
+                                    {
+                                        return_sprite = false;
+                                    }
+                                    else
+                                    {
+                                        return_sprite = true;
+                                    }
+                                }
+                            }
                             click_card = false;
                             cout << "released button x = " << event.mouseButton.x << " y = " << event.mouseButton.y << endl;
                             draging = false;
@@ -240,7 +273,7 @@ int main()
                                 if (arrayCard[i].getCondition() == conditions::open && (arr_sprites[i].getGlobalBounds().contains(arr_sprites[dragging_index].getPosition().x, arr_sprites[dragging_index].getPosition().y) || arr_sprites[i].getGlobalBounds().contains(arr_sprites[dragging_index].getPosition().x + 164.2, arr_sprites[dragging_index].getPosition().y)))
                                 {
                                     future_cols = arrayCard[i].getNumberCols();
-                                    if (future_cols != current_cols)
+                                    if (future_cols != current_cols) 
                                     {
                                         collission = true;
                                         cout << "collision" << endl;
@@ -272,18 +305,34 @@ int main()
                                 count = 0;
                                 return_sprite = true;
                             }
-                            for (int i = 0;i < slot_for_card.size();i++)
+                        }
+                        if (click_card_shop)
+                        {
+                            click_card_shop = false;
+                            draging = false;
+                            for (int i = 0;i < arr_sprites.size();i++)
                             {
-                                if (slot_for_card[i].getGlobalBounds().contains(arr_sprites[dragging_index].getPosition().x, arr_sprites[dragging_index].getPosition().y) || slot_for_card[i].getGlobalBounds().contains(arr_sprites[dragging_index].getPosition().x +164.2, arr_sprites[dragging_index].getPosition().y))
+                                if (i == dragging_index)
                                 {
-                                    cout << "collision slots" << endl;
-                                    //return_sprite = false;
-                                    //c.swaps_card_on_slot(r.get_ref(cols_v1, cols_v2, cols_v3, cols_v4, cols_v5, cols_v6, cols_v7, current_cols), r.get_ref_slot(slot_v1.get_slot(), slot_v2.get_slot(), slot_v3.get_slot(), slot_v4.get_slot(), i), arrayCard, arr_sprites, i);
-                                    if (c.swaps_card_on_slot(r.get_ref(cols_v1, cols_v2, cols_v3, cols_v4, cols_v5, cols_v6, cols_v7, current_cols), r.get_ref_slot(slot_v1, slot_v2, slot_v3, slot_v4, i), arrayCard, arr_sprites, i))
-                                    {
-
-                                    }
+                                    continue;
                                 }
+                                if (arrayCard[i].getCondition() == conditions::open && (arr_sprites[i].getGlobalBounds().contains(arr_sprites[dragging_index].getPosition().x, arr_sprites[dragging_index].getPosition().y) || arr_sprites[i].getGlobalBounds().contains(arr_sprites[dragging_index].getPosition().x + 164.2, arr_sprites[dragging_index].getPosition().y)))
+                                {
+                                    collission = true;
+                                }
+                            }
+                            if (collission)
+                            {
+
+                            }
+                            else
+                            {
+                                total_step_x = arr_sprites[dragging_index].getPosition().x - start_x;
+                                total_step_y = arr_sprites[dragging_index].getPosition().y - start_y;
+                                step_x = total_step_x / 10;
+                                step_y = total_step_y / 10;
+                                count = 0;
+                                return_sprite = true;
                             }
                         }
                     }
@@ -1029,7 +1078,7 @@ vector<int>& return_ref::get_ref_slot(vector<int>& slot_1, vector<int>& slot_2, 
     }
 }
 
-slot return_ref::get_ref_slot(slot& slot_1, slot& slot_2, slot& slot_3, slot& slot_4, int poz)
+slot& return_ref::get_ref_slot(slot& slot_1, slot& slot_2, slot& slot_3, slot& slot_4, int poz)
 {
     switch (poz)
     {
@@ -1080,6 +1129,14 @@ bool change_vectors::swaps_card_on_slot(vector<int>& first_v, slot& last_v, vect
 {
     if (last_v.add(first_v[first_v.size() - 1], arr[first_v[first_v.size() - 1]].getIndex(), arr[first_v[first_v.size() - 1]].getMast()))
     {
+        arr[last_v.top()].setCondition(conditions::is_slot);
+        arr_spr[last_v.top()].setPosition(500.0f + (170 * slots), 50.0f);
+        arr[last_v.top()].setNumberCols(0);
+        first_v.erase(first_v.begin() + (first_v.size() - 1));
+        if (first_v.size() != 0)
+        {
+            arr[first_v[first_v.size() - 1]].setCondition(conditions::open);
+        }
         return true;
     }
     else
@@ -1112,4 +1169,9 @@ bool slot::add(int value, int index, int mast)
     {
         return false;
     }
+}
+
+int slot::top()
+{
+    return slot_card[slot_card.size()-1];
 }
