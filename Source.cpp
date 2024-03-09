@@ -1,96 +1,31 @@
 #include "SFML\Graphics.hpp"
+#include "enums.h"
+#include "Card.h"
+#include "feelding.h"
+#include "drawing.h"
+#include "slot.h"
 #include <vector>
 #include <ctime>
 #include <algorithm>
 #include <iostream>
-#include <memory>
 using namespace std;
 using namespace sf;
-enum masts
-{
-    no_mast,
-    hearts,
-    cross,
-    booby,
-    peaks
-};
-enum colors
-{
-    no_colors,
-    red,
-    black
-};
-enum conditions
-{
-    open,
-    is_shop,
-    is_slot,
-    closed,
-    none
-};
-class Card
+class moving
 {
 public:
-    Card(int index, int mast, int color, float pozitionX, float pozitionY, int number);//конструктор с параметрами
-    Card();//базовый конструктор
-    void setIndex(int index);//передача индекса
-    void setMast(int mast);//передача масти
-    void setColor(int color);//передача цвета
-    void setPozition(float pozitionX, float PozitionY);//передача позиции
-    void setNumber(int number);//передача порядкового номера
-    void setUsers(bool users);//передача использования карты
-    void setCondition(int condition);//передача состояния карты
-    void setNumberCols(int number_cols);
-    int getIndex();//возврат нидекса
-    int getMast();//возврат масти
-    int getColor();//возврат цвета
-    float getPozitionX();//возврат позиции х
-    float getPozitionY();//возврат позиции у
-    int getNumber();//возврат порядкового номера
-    bool getUsers();//возврат использования карты
-    int getCondition();//возврат состояния карты
-    int getNumberCols();
+    void checkClick(Sprite &shop_sp, vector<Sprite> &arr, vector<int> &arr_shop,vector<Card> arr_card, float x, float y);
 private:
-    int index;//индекс карты
-    int mast;//масть карты
-    int color;//цвет карты
-    float pozitionX;//позиция по х
-    float pozitionY;//позиция по у
-    int number;//порядковый номер элемента
-    bool users;//использование карты
-    int condition;//состояние карты
-    int number_cols;//номер колонки в которой находится карта
+    int varClick = clicks::no_click;
+    bool dragging = false;
+    bool collision = false;
+    int draggingIndex = 0;
+    bool returnSprite = false;
+    int countShop = 0;
+    bool firstClickShop = true;
+    bool checkClickShop(Sprite& shop_sp, vector<int>& arr_shop, float x, float y);
+    bool checkClickCard(vector<Sprite>& arr, vector<Card> arr_card, float x, float y);
 };
-class slot
-{
-public:
-    vector<int>& get_slot();
-    bool add(int value,int index, int mast);
-    int top();
-private:
-    vector<int> slot_card;
-    int mast = masts::no_mast;
-    int index = 0;
-};
-class fielding
-{
-public:
-    vector<Card> fieldArray();
-    vector<Sprite> field_array_for_card(Texture* texture);
-    vector<int> field_cols(vector<Card>& check, int size);
-    vector<int>field_array_shop(vector<Card>& check);
-    vector<Sprite> field_array_sprite(Texture* texture, vector<Card>& arrayCard);
-    void field_conditions(vector<Card>& arrayCard, vector<int>& v1, vector<int>& v2, vector<int>& v3, vector<int>& v4, vector<int>& v5, vector<int>& v6, vector<int>& v7, vector<int>& slot_v1, vector<int>& slot_v2, vector<int>& slot_v3, vector<int>& slot_v4, vector<int>& shop_arr);
-    void field_number_cols(vector<Card>& arrayCard, vector<int>& v1, vector<int>& v2, vector<int>& v3, vector<int>& v4, vector<int>& v5, vector<int>& v6, vector<int>& v7);
-};
-class drawing
-{
-public:
-    void first_draw_all_cols(RenderWindow& window, Sprite& closed_card, vector<Card>& arr, vector<Sprite>& sprite, vector<int>& v1, vector<int>& v2, vector<int>& v3, vector<int>& v4, vector<int>& v5, vector<int>& v6, vector<int>& v7);
-    void draw_cols(RenderWindow& window, Sprite& closed_card, vector<Card>& arr, vector<Sprite>& sprite, vector<int>& v1, vector<int>& v2, vector<int>& v3, vector<int>& v4, vector<int>& v5, vector<int>& v6, vector<int>& v7);
-    void draw_slots(RenderWindow& window, vector<Card>& arr, vector<Sprite>& sprite, vector<int>& slot_1, vector<int>& slot_2, vector<int>& slot_3, vector<int>& slot_4);
 
-};
 class return_ref
 {
 public: 
@@ -244,23 +179,39 @@ int main()
                 {
                     if (event.mouseButton.button == Mouse::Left)
                     {
-                        if (click_card)
+                        if (click_card_shop)
                         {
-                            for (int i = 0;i < slot_for_card.size();i++)
+                            click_card_shop = false;
+                            draging = false;
+                            collission = false;
+                            for (int i = 0;i < arr_sprites.size();i++)
                             {
-                                if (slot_for_card[i].getGlobalBounds().contains(arr_sprites[dragging_index].getPosition().x, arr_sprites[dragging_index].getPosition().y) || slot_for_card[i].getGlobalBounds().contains(arr_sprites[dragging_index].getPosition().x + 164.2, arr_sprites[dragging_index].getPosition().y))
+                                if (i == dragging_index)
                                 {
-                                    cout << "collision slots" << endl;
-                                    if (c.swaps_card_on_slot(r.get_ref(cols_v1, cols_v2, cols_v3, cols_v4, cols_v5, cols_v6, cols_v7, current_cols), r.get_ref_slot(slot_v1, slot_v2, slot_v3, slot_v4, i), arrayCard, arr_sprites, i))
-                                    {
-                                        return_sprite = false;
-                                    }
-                                    else
-                                    {
-                                        return_sprite = true;
-                                    }
+                                    continue;
+                                }
+                                if (arrayCard[i].getCondition() == conditions::open && (arr_sprites[i].getGlobalBounds().contains(arr_sprites[dragging_index].getPosition().x, arr_sprites[dragging_index].getPosition().y) || arr_sprites[i].getGlobalBounds().contains(arr_sprites[dragging_index].getPosition().x + 164.2, arr_sprites[dragging_index].getPosition().y)))
+                                {
+                                    collission = true;
                                 }
                             }
+                            if (collission)
+                            {
+                                return_sprite = false;
+
+                            }
+                            else
+                            {
+                                total_step_x = arr_sprites[dragging_index].getPosition().x - start_x;
+                                total_step_y = arr_sprites[dragging_index].getPosition().y - start_y;
+                                step_x = total_step_x / 10;
+                                step_y = total_step_y / 10;
+                                count = 0;
+                                return_sprite = true;
+                            }
+                        }
+                        if (click_card)
+                        {
                             click_card = false;
                             cout << "released button x = " << event.mouseButton.x << " y = " << event.mouseButton.y << endl;
                             draging = false;
@@ -305,34 +256,20 @@ int main()
                                 count = 0;
                                 return_sprite = true;
                             }
-                        }
-                        if (click_card_shop)
-                        {
-                            click_card_shop = false;
-                            draging = false;
-                            for (int i = 0;i < arr_sprites.size();i++)
+                            for (int i = 0;i < slot_for_card.size();i++)
                             {
-                                if (i == dragging_index)
+                                if (slot_for_card[i].getGlobalBounds().contains(arr_sprites[dragging_index].getPosition().x, arr_sprites[dragging_index].getPosition().y) || slot_for_card[i].getGlobalBounds().contains(arr_sprites[dragging_index].getPosition().x + 164.2, arr_sprites[dragging_index].getPosition().y))
                                 {
-                                    continue;
+                                    cout << "collision slots" << endl;
+                                    if (c.swaps_card_on_slot(r.get_ref(cols_v1, cols_v2, cols_v3, cols_v4, cols_v5, cols_v6, cols_v7, current_cols), r.get_ref_slot(slot_v1, slot_v2, slot_v3, slot_v4, i), arrayCard, arr_sprites, i))
+                                    {
+                                        return_sprite = false;
+                                    }
+                                    else
+                                    {
+                                        return_sprite = true;
+                                    }
                                 }
-                                if (arrayCard[i].getCondition() == conditions::open && (arr_sprites[i].getGlobalBounds().contains(arr_sprites[dragging_index].getPosition().x, arr_sprites[dragging_index].getPosition().y) || arr_sprites[i].getGlobalBounds().contains(arr_sprites[dragging_index].getPosition().x + 164.2, arr_sprites[dragging_index].getPosition().y)))
-                                {
-                                    collission = true;
-                                }
-                            }
-                            if (collission)
-                            {
-
-                            }
-                            else
-                            {
-                                total_step_x = arr_sprites[dragging_index].getPosition().x - start_x;
-                                total_step_y = arr_sprites[dragging_index].getPosition().y - start_y;
-                                step_x = total_step_x / 10;
-                                step_y = total_step_y / 10;
-                                count = 0;
-                                return_sprite = true;
                             }
                         }
                     }
@@ -378,652 +315,9 @@ int main()
     }
 	return 0;
 }
-Card::Card(int index, int mast, int color, float pozitionX, float pozitionY, int number)
-{
-    this->index = index;
-    this->mast = mast;
-    this->color = color;
-    this->pozitionX = pozitionX;
-    this->pozitionY = pozitionY;
-    this->number = number;
-    this->users = false;
-    this->condition = conditions::none;
-    this->number_cols = 0;
-}
 
-Card::Card()
-{
-    this->index = 0;
-    this->mast = 0;
-    this->color = 0;
-    this->pozitionX = 0.0f;
-    this->pozitionY = 0.0f;
-    this->number = 0;
-    this->users = false;
-    this->condition = conditions::none;
-    this->number_cols = 0;
-}
-void Card::setIndex(int index)
-{
-    this->index = index;
-}
-void Card::setMast(int mast)
-{
-    this->mast = mast;
-}
-void Card::setColor(int color)
-{
-    this->color = color;
-}
-void Card::setPozition(float pozitionX, float pozitionY)
-{
-    this->pozitionX = pozitionX;
-    this->pozitionY = pozitionY;
-}
-void Card::setNumber(int number)
-{
-    this->number = number;
-}
-void Card::setUsers(bool users)
-{
-    this->users = users;
-}
-void Card::setCondition(int condition)
-{
-    this->condition = condition;
-}
-void Card::setNumberCols(int number_cols)
-{
-    this->number_cols = number_cols;
-}
-int Card::getIndex()
-{
-    return index;
-}
-int Card::getMast()
-{
-    return mast;
-}
-int Card::getColor()
-{
-    return color;
-}
-float Card::getPozitionX()
-{
-    return pozitionX;
-}
-float Card::getPozitionY()
-{
-    return pozitionY;
-}
-int Card::getNumber()
-{
-    return number;
-}
-bool Card::getUsers()
-{
-    return users;
-}
-int Card::getCondition()
-{
-    return condition;
-}
 
-int Card::getNumberCols()
-{
-    return number_cols;
-}
 
-vector<Card> fielding::fieldArray()
-{
-    vector<Card> result;
-    int totalIndex = 0;
-    int cols = 0;
-    int n = 0;
-    result.reserve(52);
-    for (int i = 0;i < 52;i++)
-    {
-        Card card;
-        card.setIndex(totalIndex);
-        card.setPozition(20 + (totalIndex * 164.2), 20 + (cols * 230));
-        card.setNumber(n);
-        n++;
-        if (cols == 0)
-        {
-            card.setColor(colors::red);
-            card.setMast(masts::hearts);
-        }
-        else if (cols == 1)
-        {
-            card.setColor(colors::black);
-            card.setMast(masts::cross);
-        }
-        else if (cols == 2)
-        {
-            card.setColor(colors::red);
-            card.setMast(masts::booby);
-        }
-        else if (cols == 3)
-        {
-            card.setColor(colors::black);
-            card.setMast(masts::peaks);
-        }
-        totalIndex++;
-        if (totalIndex > 12)
-        {
-            totalIndex = 0;
-            cols++;
-        }
-        result.push_back(card);
-    }
-    return result;
-}
-
-vector<Sprite> fielding::field_array_for_card(Texture* texture)
-{
-    vector<Sprite> result;
-    float pozitionX = 500.0;
-    float pozitionY = 50.0;
-    for (int i = 0;i < 4;i++)
-    {
-        Sprite card_spr;
-        card_spr.setTexture(*texture);
-        card_spr.setTextureRect(IntRect(2160, 250, 164, 230));
-        card_spr.setScale(0.8f, 0.8f);
-        card_spr.setPosition(pozitionX, pozitionY);
-        pozitionX += 170;
-        result.push_back(card_spr);
-    }
-    return result;
-}
-
-vector<int> fielding::field_cols(vector<Card>& check, int size)
-{
-    vector<int> result;
-    result.reserve(size);
-    int value = 0;
-    auto it = check.begin();
-    for (int i = 0;i < size;)
-    {
-        value = rand() % 52;
-        it = check.begin();
-        advance(it, value);
-        if (it->getUsers() == false)
-        {
-            result.push_back(value);
-            it->setUsers(true);
-            i++;
-        }
-    }
-    return result;
-}
-
-vector<int> fielding::field_array_shop(vector<Card>& check)
-{
-    vector<int> result;
-    int count = 0;
-    result.reserve(24);
-    for (auto it = check.begin();it != check.end();it++)
-    {
-        if (it->getUsers() == false)
-        {
-            result.push_back(count);
-            it->setColor(true);
-        }
-        count++;
-    }
-    return result;
-}
-
-vector<Sprite> fielding::field_array_sprite(Texture* texture, vector<Card>& arrayCard)
-{
-    vector<Sprite> result;
-    result.reserve(52);
-    for (auto& cards : arrayCard)
-    {
-        Sprite sprite;
-        sprite.setTexture(*texture);
-        sprite.setTextureRect(IntRect(cards.getPozitionX(), cards.getPozitionY(), 164, 230));
-        sprite.setScale(0.8f, 0.8f);
-        sprite.setPosition(200, 50);
-        result.push_back(sprite);
-    }
-    return result;
-}
-
-void fielding::field_conditions(vector<Card>& arrayCard, vector<int>& v1, vector<int>& v2, vector<int>& v3, vector<int>& v4, vector<int>& v5, vector<int>& v6, vector<int>& v7, vector<int>& slot_v1, vector<int>& slot_v2, vector<int>& slot_v3, vector<int>& slot_v4, vector<int>& shop_arr)
-{
-    auto it = arrayCard.begin();
-    if (!slot_v1.empty())
-    {
-        for (auto& el : slot_v1)
-        {
-            advance(it, el);
-            it->setCondition(conditions::is_slot);
-            it = arrayCard.begin();
-        }
-    }
-    if (!slot_v2.empty())
-    {
-        for (auto& el : slot_v2)
-        {
-            advance(it, el);
-            it->setCondition(conditions::is_slot);
-            it = arrayCard.begin();
-        }
-    }
-    if (!slot_v3.empty())
-    {
-        for (auto& el : slot_v3)
-        {
-            advance(it, el);
-            it->setCondition(conditions::is_slot);
-            it = arrayCard.begin();
-        }
-    }
-    if (!slot_v4.empty())
-    {
-        for (auto& el : slot_v4)
-        {
-            advance(it, el);
-            it->setCondition(conditions::is_slot);
-            it = arrayCard.begin();
-        }
-    }
-    auto it_v = v1.begin();
-    for (auto& el : v1)
-    {
-        it = arrayCard.begin();
-        if (it_v == v1.end() - 1)
-        {
-            advance(it, el);
-            it->setCondition(conditions::open);
-        }
-        else
-        {
-            advance(it, el);
-            it->setCondition(conditions::closed);
-            it_v++;
-        }
-    }
-    it_v = v2.begin();
-    for (auto& el : v2)
-    {
-        it = arrayCard.begin();
-        if (it_v == v2.end() - 1)
-        {
-            advance(it, el);
-            it->setCondition(conditions::open);
-        }
-        else
-        {
-            advance(it, el);
-            it->setCondition(conditions::closed);
-            it_v++;
-        }
-    }
-    it_v = v3.begin();
-    for (auto& el : v3)
-    {
-        it = arrayCard.begin();
-        if (it_v == v3.end() - 1)
-        {
-            advance(it, el);
-            it->setCondition(conditions::open);
-        }
-        else
-        {
-            advance(it, el);
-            it->setCondition(conditions::closed);
-            it_v++;
-        }
-    }
-    it_v = v4.begin();
-    for (auto& el : v4)
-    {
-        it = arrayCard.begin();
-        if (it_v == v4.end() - 1)
-        {
-            advance(it, el);
-            it->setCondition(conditions::open);
-        }
-        else
-        {
-            advance(it, el);
-            it->setCondition(conditions::closed);
-            it_v++;
-        }
-    }
-    it_v = v5.begin();
-    for (auto& el : v5)
-    {
-        it = arrayCard.begin();
-        if (it_v == v5.end() - 1)
-        {
-            advance(it, el);
-            it->setCondition(conditions::open);
-        }
-        else
-        {
-            advance(it, el);
-            it->setCondition(conditions::closed);
-            it_v++;
-        }
-    }
-    it_v = v6.begin();
-    for (auto& el : v6)
-    {
-        it = arrayCard.begin();
-        if (it_v == v6.end() - 1)
-        {
-            advance(it, el);
-            it->setCondition(conditions::open);
-        }
-        else
-        {
-            advance(it, el);
-            it->setCondition(conditions::closed);
-            it_v++;
-        }
-    }
-    it_v = v7.begin();
-    for (auto& el : v7)
-    {
-        it = arrayCard.begin();
-        if (it_v == v7.end() - 1)
-        {
-            advance(it, el);
-            it->setCondition(conditions::open);
-        }
-        else
-        {
-            advance(it, el);
-            it->setCondition(conditions::closed);
-            it_v++;
-        }
-    }
-    for (auto& el : arrayCard)
-    {
-        if (el.getCondition() == conditions::none)
-        {
-            el.setCondition(conditions::is_shop);
-        }
-    }
-}
-
-void fielding::field_number_cols(vector<Card>& arrayCard, vector<int>& v1, vector<int>& v2, vector<int>& v3, vector<int>& v4, vector<int>& v5, vector<int>& v6, vector<int>& v7)
-{
-    for (auto& el : arrayCard)
-    {
-        el.setNumberCols(0);
-    }
-    for (auto& el : v1)
-    {
-        arrayCard[el].setNumberCols(1);
-    }
-    for (auto& el : v2)
-    {
-        arrayCard[el].setNumberCols(2);
-    }
-    for (auto& el : v3)
-    {
-        arrayCard[el].setNumberCols(3);
-    }
-    for (auto& el : v4)
-    {
-        arrayCard[el].setNumberCols(4);
-    }
-    for (auto& el : v5)
-    {
-        arrayCard[el].setNumberCols(5);
-    }
-    for (auto& el : v6)
-    {
-        arrayCard[el].setNumberCols(6);
-    }
-    for (auto& el : v7)
-    {
-        arrayCard[el].setNumberCols(7);
-    }
-}
-
-void drawing::first_draw_all_cols(RenderWindow& window, Sprite& closed_card, vector<Card>& arr, vector<Sprite>& sprite, vector<int>& v1, vector<int>& v2, vector<int>& v3, vector<int>& v4, vector<int>& v5, vector<int>& v6, vector<int>& v7)
-{
-    float total_x = 200.0f;
-    float total_y = 300.0f;
-    for (auto& el : v1)
-    {
-        if (arr[el].getCondition() == conditions::closed)
-        {
-            closed_card.setPosition(total_x, total_y);
-            sprite[el].setPosition(total_x, total_y);
-            window.draw(closed_card);
-            total_y += 50;
-        }
-        else
-        {
-            sprite[el].setPosition(total_x, total_y);
-            window.draw(sprite[el]);
-            total_y += 50;
-        }
-    }
-    total_x += 200.0f;
-    total_y = 300.0f;
-    for (auto& el : v2)
-    {
-        if (arr[el].getCondition() == conditions::closed)
-        {
-            closed_card.setPosition(total_x, total_y);
-            sprite[el].setPosition(total_x, total_y);
-            window.draw(closed_card);
-            total_y += 50;
-        }
-        else
-        {
-            sprite[el].setPosition(total_x, total_y);
-            window.draw(sprite[el]);
-            total_y += 50;
-        }
-    }
-    total_x += 200.0f;
-    total_y = 300.0f;
-    for (auto& el : v3)
-    {
-        if (arr[el].getCondition() == conditions::closed)
-        {
-            closed_card.setPosition(total_x, total_y);
-            sprite[el].setPosition(total_x, total_y);
-            window.draw(closed_card);
-            total_y += 50;
-        }
-        else
-        {
-            sprite[el].setPosition(total_x, total_y);
-            window.draw(sprite[el]);
-            total_y += 50;
-        }
-    }
-    total_x += 200.0f;
-    total_y = 300.0f;
-    for (auto& el : v4)
-    {
-        if (arr[el].getCondition() == conditions::closed)
-        {
-            closed_card.setPosition(total_x, total_y);
-            sprite[el].setPosition(total_x, total_y);
-            window.draw(closed_card);
-            total_y += 50;
-        }
-        else
-        {
-            sprite[el].setPosition(total_x, total_y);
-            window.draw(sprite[el]);
-            total_y += 50;
-        }
-    }
-    total_x += 200.0f;
-    total_y = 300.0f;
-    for (auto& el : v5)
-    {
-        if (arr[el].getCondition() == conditions::closed)
-        {
-            closed_card.setPosition(total_x, total_y);
-            sprite[el].setPosition(total_x, total_y);
-            window.draw(closed_card);
-            total_y += 50;
-        }
-        else
-        {
-            sprite[el].setPosition(total_x, total_y);
-            window.draw(sprite[el]);
-            total_y += 50;
-        }
-    }
-    total_x += 200.0f;
-    total_y = 300.0f;
-    for (auto& el : v6)
-    {
-        if (arr[el].getCondition() == conditions::closed)
-        {
-            closed_card.setPosition(total_x, total_y);
-            sprite[el].setPosition(total_x, total_y);
-            window.draw(closed_card);
-            total_y += 50;
-        }
-        else
-        {
-            sprite[el].setPosition(total_x, total_y);
-            window.draw(sprite[el]);
-            total_y += 50;
-        }
-    }
-    total_x += 200.0f;
-    total_y = 300.0f;
-    for (auto& el : v7)
-    {
-        if (arr[el].getCondition() == conditions::closed)
-        {
-            closed_card.setPosition(total_x, total_y);
-            sprite[el].setPosition(total_x, total_y);
-            window.draw(closed_card);
-            total_y += 50;
-        }
-        else
-        {
-            sprite[el].setPosition(total_x, total_y);
-            window.draw(sprite[el]);
-            total_y += 50;
-        }
-    }
-}
-
-void drawing::draw_cols(RenderWindow& window, Sprite& closed_card, vector<Card>& arr, vector<Sprite>& sprite, vector<int>& v1, vector<int>& v2, vector<int>& v3, vector<int>& v4, vector<int>& v5, vector<int>& v6, vector<int>& v7)
-{
-    for (auto& el : v1)
-    {
-        if (arr[el].getCondition() == conditions::closed)
-        {
-            closed_card.setPosition(sprite[el].getPosition());
-            window.draw(closed_card);
-        }
-        else if (arr[el].getCondition() == conditions::open)
-        {
-            window.draw(sprite[el]);
-        }
-    }
-    for (auto& el : v2)
-    {
-        if (arr[el].getCondition() == conditions::closed)
-        {
-            closed_card.setPosition(sprite[el].getPosition());
-            window.draw(closed_card);
-        }
-        else if (arr[el].getCondition() == conditions::open)
-        {
-            window.draw(sprite[el]);
-        }
-    }
-    for (auto& el : v3)
-    {
-        if (arr[el].getCondition() == conditions::closed)
-        {
-            closed_card.setPosition(sprite[el].getPosition());
-            window.draw(closed_card);
-        }
-        else if (arr[el].getCondition() == conditions::open)
-        {
-            window.draw(sprite[el]);
-        }
-    }
-    for (auto& el : v4)
-    {
-        if (arr[el].getCondition() == conditions::closed)
-        {
-            closed_card.setPosition(sprite[el].getPosition());
-            window.draw(closed_card);
-        }
-        else if (arr[el].getCondition() == conditions::open)
-        {
-            window.draw(sprite[el]);
-        }
-    }
-    for (auto& el : v5)
-    {
-        if (arr[el].getCondition() == conditions::closed)
-        {
-            closed_card.setPosition(sprite[el].getPosition());
-            window.draw(closed_card);
-        }
-        else if (arr[el].getCondition() == conditions::open)
-        {
-            window.draw(sprite[el]);
-        }
-    }
-    for (auto& el : v6)
-    {
-        if (arr[el].getCondition() == conditions::closed)
-        {
-            closed_card.setPosition(sprite[el].getPosition());
-            window.draw(closed_card);
-        }
-        else if (arr[el].getCondition() == conditions::open)
-        {
-            window.draw(sprite[el]);
-        }
-    }
-    for (auto& el : v7)
-    {
-        if (arr[el].getCondition() == conditions::closed)
-        {
-            closed_card.setPosition(sprite[el].getPosition());
-            window.draw(closed_card);
-        }
-        else if (arr[el].getCondition() == conditions::open)
-        {
-            window.draw(sprite[el]);
-        }
-    }
-}
-
-void drawing::draw_slots(RenderWindow& window, vector<Card>& arr, vector<Sprite>& sprite, vector<int>& slot_1, vector<int>& slot_2, vector<int>& slot_3, vector<int>& slot_4)
-{
-    if (!slot_1.empty())
-    {
-        window.draw(sprite[slot_1[slot_1.size() - 1]]);
-    }
-    if (!slot_2.empty())
-    {
-        window.draw(sprite[slot_2[slot_2.size() - 1]]);
-    }
-    if (!slot_3.empty())
-    {
-        window.draw(sprite[slot_3[slot_3.size() - 1]]);
-    }
-    if (!slot_4.empty())
-    {
-        window.draw(sprite[slot_4[slot_4.size() - 1]]);
-    }
-}
 
 vector<int>& return_ref::get_ref(vector<int>& v1, vector<int>& v2, vector<int>& v3, vector<int>& v4, vector<int>& v5, vector<int>& v6, vector<int>& v7, int poz)
 {
@@ -1112,19 +406,6 @@ void change_vectors::swaps_card(vector<int>& first_v, vector<int>& last_v, vecto
     arr_spr[last_v[last_v.size()-1]].setPosition(200.0f * cols, 300.0f + (50.0f * (last_v.size() - 1)));
 }
 
-/*void change_vectors::swaps_card_on_slot(vector<int>& first_v, vector<int>& last_v, vector<Card>& arr, vector<Sprite>& arr_spr, int slots)
-{
-    last_v.push_back(first_v[first_v.size() - 1]);
-    arr[last_v[last_v.size() - 1]].setCondition(conditions::is_slot);
-    arr_spr[last_v[last_v.size() - 1]].setPosition(500.0f + (170 * slots), 50.0f);
-    arr[first_v[first_v.size() - 1]].setNumberCols(0);
-    first_v.erase(first_v.begin() + (first_v.size() - 1));
-    if (first_v.size() != 0)
-    {
-        arr[first_v[first_v.size() - 1]].setCondition(conditions::open);
-    }
-}*/
-
 bool change_vectors::swaps_card_on_slot(vector<int>& first_v, slot& last_v, vector<Card>& arr, vector<Sprite>& arr_spr, int slots)
 {
     if (last_v.add(first_v[first_v.size() - 1], arr[first_v[first_v.size() - 1]].getIndex(), arr[first_v[first_v.size() - 1]].getMast()))
@@ -1145,24 +426,31 @@ bool change_vectors::swaps_card_on_slot(vector<int>& first_v, slot& last_v, vect
     }
 }
 
-vector<int>& slot::get_slot()
+void moving::checkClick(Sprite& shop_sp, vector<Sprite>& arr, vector<int>& arr_shop, vector<Card> arr_card, float x, float y)
 {
-    return slot_card; 
+    if (checkClickShop(shop_sp, arr_shop, x, y))
+    {
+        varClick = clicks::click_shop;
+    }
+
 }
 
-bool slot::add(int value, int index, int mast)
+bool moving::checkClickShop(Sprite& shop_sp, vector<int>& arr_shop, float x, float y)
 {
-    if (this->mast == masts::no_mast && this->index == index)
+    if (shop_sp.getGlobalBounds().contains(x, y))
     {
-        this->mast = mast;
-        this->index++;
-        slot_card.push_back(value);
-        return true;
-    }
-    if (this->mast == mast&&this->index == index)
-    {
-        this->index++;
-        slot_card.push_back(value);
+        if (!firstClickShop)
+        {
+            ++countShop;
+            if (countShop == arr_shop.size())
+            {
+                countShop = 0;
+            }
+        }
+        else
+        {
+            firstClickShop = false;
+        }
         return true;
     }
     else
@@ -1171,7 +459,16 @@ bool slot::add(int value, int index, int mast)
     }
 }
 
-int slot::top()
+bool moving::checkClickCard(vector<Sprite>& arr, vector<Card> arr_card, float x, float y)
 {
-    return slot_card[slot_card.size()-1];
+    for (size_t i = 0;i < arr.size();i++)
+    {
+        if (arr[i].getGlobalBounds().contains(x, y) && arr_card[i].getCondition() == conditions::open)
+        {
+            draggingIndex = i;
+            dragging = true;
+        }
+    }
+    return false;
 }
+

@@ -131,9 +131,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Card.cpp" />
+    <ClCompile Include="drawing.cpp" />
+    <ClCompile Include="feelding.cpp" />
+    <ClCompile Include="slot.cpp" />
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Card.h" />
+    <ClInclude Include="drawing.h" />
+    <ClInclude Include="enums.h" />
+    <ClInclude Include="feelding.h" />
+    <ClInclude Include="slot.h" />
     <ClInclude Include="Source.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
