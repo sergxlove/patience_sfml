@@ -37,7 +37,9 @@ class change_vectors
 {
 public:
     void swaps_card(vector<int>& first_v, vector<int>& last_v, vector<Card>& arr, vector<Sprite>& arr_spr, int cols);
+    void swap_cardShop(vector<int> first_v, vector<int>& last_v, vector<Card>& arr, vector<Sprite>& arr_spr, int cols, int dragging_index);
     bool swaps_card_on_slot(vector<int>& first_v, slot& last_v, vector<Card>& arr, vector<Sprite>& arr_spr, int slots);
+    bool swaps_cardShop_on_slot(vector<int>& first_v, slot& last_v, vector<Card>& arr, vector<Sprite>& arr_spr, int slots, int dragging_index);
 };
 int main()
 {
@@ -131,6 +133,7 @@ int main()
                                 {
                                     count_arr_shop = 0;
                                 }
+                                cout << "count arr" << count_arr_shop << endl;
                             }
                             else
                             {
@@ -142,6 +145,7 @@ int main()
                             if (arr_sprites[arr_shop[count_arr_shop]].getGlobalBounds().contains(Mouse::getPosition(window).x, Mouse::getPosition(window).y))
                             {
                                 dragging_index = arr_shop[count_arr_shop];
+                                cout << "draging index = " << dragging_index << endl;
                                 draging = true;
                                 click_card_shop = true;
                                 dx = Mouse::getPosition(window).x - arr_sprites[dragging_index].getPosition().x;
@@ -193,12 +197,13 @@ int main()
                                 if (arrayCard[i].getCondition() == conditions::open && (arr_sprites[i].getGlobalBounds().contains(arr_sprites[dragging_index].getPosition().x, arr_sprites[dragging_index].getPosition().y) || arr_sprites[i].getGlobalBounds().contains(arr_sprites[dragging_index].getPosition().x + 164.2, arr_sprites[dragging_index].getPosition().y)))
                                 {
                                     collission = true;
+                                    future_cols = arrayCard[i].getNumberCols();
                                 }
                             }
                             if (collission)
                             {
                                 return_sprite = false;
-
+                                c.swap_cardShop(arr_shop, r.get_ref(cols_v1, cols_v2, cols_v3, cols_v4, cols_v5, cols_v6, cols_v7, future_cols), arrayCard, arr_sprites, future_cols, count_arr_shop);
                             }
                             else
                             {
@@ -208,6 +213,26 @@ int main()
                                 step_y = total_step_y / 10;
                                 count = 0;
                                 return_sprite = true;
+                            }
+                            for (int i = 0;i < slot_for_card.size();i++)
+                            {
+                                if (slot_for_card[i].getGlobalBounds().contains(arr_sprites[dragging_index].getPosition().x, arr_sprites[dragging_index].getPosition().y) || slot_for_card[i].getGlobalBounds().contains(arr_sprites[dragging_index].getPosition().x + 164.2, arr_sprites[dragging_index].getPosition().y))
+                                {
+                                    cout << "collision slots" << endl;
+                                    if (c.swaps_cardShop_on_slot(arr_shop, r.get_ref_slot(slot_v1, slot_v2, slot_v3, slot_v4, i), arrayCard, arr_sprites, i, count_arr_shop))
+                                    {
+                                        return_sprite = false;
+                                        if (count_arr_shop != 0)
+                                        {
+                                            count_arr_shop--;
+                                        }
+                                        draw_arr_shop = false;
+                                    }
+                                    else
+                                    {
+                                        return_sprite = true;
+                                    }
+                                }
                             }
                         }
                         if (click_card)
@@ -300,7 +325,7 @@ int main()
             {
                 d.draw_cols(window, closed_card, arrayCard, arr_sprites, cols_v1, cols_v2, cols_v3, cols_v4, cols_v5, cols_v6, cols_v7);
             }
-            if (draw_arr_shop)
+            if (draw_arr_shop && !arr_shop.empty())
             {
                 window.draw(arr_sprites[arr_shop[count_arr_shop]]);
             }
@@ -315,9 +340,6 @@ int main()
     }
 	return 0;
 }
-
-
-
 
 vector<int>& return_ref::get_ref(vector<int>& v1, vector<int>& v2, vector<int>& v3, vector<int>& v4, vector<int>& v5, vector<int>& v6, vector<int>& v7, int poz)
 {
@@ -406,6 +428,16 @@ void change_vectors::swaps_card(vector<int>& first_v, vector<int>& last_v, vecto
     arr_spr[last_v[last_v.size()-1]].setPosition(200.0f * cols, 300.0f + (50.0f * (last_v.size() - 1)));
 }
 
+void change_vectors::swap_cardShop(vector<int> first_v, vector<int>& last_v, vector<Card>& arr, vector<Sprite>& arr_spr, int cols, int dragging_index)
+{
+    last_v.push_back(first_v[dragging_index]);
+    arr[first_v[dragging_index]].setNumberCols(cols);
+    first_v.erase(first_v.begin() + dragging_index);
+    arr_spr[last_v[last_v.size() - 1]].setPosition(200.0f * cols, 300.0f + (50.0f * (last_v.size() - 1)));
+    arr[last_v[last_v.size() - 1]].setCondition(conditions::open);
+    arr[last_v[last_v.size() - 1]].setNumberCols(cols);
+}
+
 bool change_vectors::swaps_card_on_slot(vector<int>& first_v, slot& last_v, vector<Card>& arr, vector<Sprite>& arr_spr, int slots)
 {
     if (last_v.add(first_v[first_v.size() - 1], arr[first_v[first_v.size() - 1]].getIndex(), arr[first_v[first_v.size() - 1]].getMast()))
@@ -418,6 +450,22 @@ bool change_vectors::swaps_card_on_slot(vector<int>& first_v, slot& last_v, vect
         {
             arr[first_v[first_v.size() - 1]].setCondition(conditions::open);
         }
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool change_vectors::swaps_cardShop_on_slot(vector<int>& first_v, slot& last_v, vector<Card>& arr, vector<Sprite>& arr_spr, int slots, int dragging_index)
+{
+    if (last_v.add(first_v[dragging_index], arr[first_v[dragging_index]].getIndex(), arr[first_v[dragging_index]].getMast()))
+    {
+        arr[last_v.top()].setCondition(conditions::is_slot);
+        arr_spr[last_v.top()].setPosition(500.0f + (170 * slots), 50.0f);
+        arr[last_v.top()].setNumber(0);
+        first_v.erase(first_v.begin() + dragging_index);
         return true;
     }
     else
