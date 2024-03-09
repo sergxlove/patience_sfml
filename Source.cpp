@@ -4,6 +4,7 @@
 #include "feelding.h"
 #include "drawing.h"
 #include "slot.h"
+#include "finishGame.h"
 #include <vector>
 #include <ctime>
 #include <algorithm>
@@ -44,12 +45,13 @@ public:
 int main()
 {
 	srand(time(NULL));
-    RenderWindow window(VideoMode(1600, 900), "Patience");
+    RenderWindow window(VideoMode(1600,900), "Patience"); // 1600 900
     Clock clock;
     fielding f;
     drawing d;
     return_ref r;
     change_vectors c;
+    finishGame g;
     Image all_card;
     Image back_image;
     all_card.loadFromFile("images/cards.png");
@@ -334,6 +336,7 @@ int main()
             {
                 window.draw(arr_sprites[dragging_index]);
             }
+            g.drawIntro(window);
             window.display();
             clock.restart();
         }

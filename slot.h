@@ -13,6 +13,6 @@ public:
 private:
     vector<int> slot_card;
     int mast = masts::no_mast;
-    int index = 0;
+    int index = 12;
 };
 #endif
