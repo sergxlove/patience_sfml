@@ -142,6 +142,7 @@
     <ClInclude Include="drawing.h" />
     <ClInclude Include="enums.h" />
     <ClInclude Include="feelding.h" />
+    <ClInclude Include="finishGame.h" />
     <ClInclude Include="slot.h" />
     <ClInclude Include="Source.h" />
   </ItemGroup>
