@@ -139,6 +139,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Card.h" />
+    <ClInclude Include="collum.h" />
     <ClInclude Include="drawing.h" />
     <ClInclude Include="enums.h" />
     <ClInclude Include="feelding.h" />
