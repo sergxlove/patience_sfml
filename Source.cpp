@@ -44,6 +44,7 @@ public:
 };
 int main()
 {
+    setlocale(LC_ALL, "rus");
 	srand(time(NULL));
     RenderWindow window(VideoMode(1600,900), "Patience"); // 1600 900
     Clock clock;
@@ -51,7 +52,7 @@ int main()
     drawing d;
     return_ref r;
     change_vectors c;
-    finishGame g;
+    finishGame g(window);
     Image all_card;
     Image back_image;
     all_card.loadFromFile("images/cards.png");
@@ -336,7 +337,7 @@ int main()
             {
                 window.draw(arr_sprites[dragging_index]);
             }
-            g.drawIntro(window);
+            //g.drawIntro(window);
             window.display();
             clock.restart();
         }
