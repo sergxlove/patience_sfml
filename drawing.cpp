@@ -217,6 +217,150 @@ void drawing::draw_cols(RenderWindow& window, Sprite& closed_card, vector<Card>&
     }
 }
 
+void drawing::draw_cols(RenderWindow& window, Sprite& closed_card, vector<Card>& arr, vector<Sprite>& sprite, vector<int>& v1, vector<int>& v2, vector<int>& v3, vector<int>& v4, vector<int>& v5, vector<int>& v6, vector<int>& v7, RectangleShape& emptyColl)
+{
+    if (v1.empty())
+    {
+        emptyColl.setPosition(200.0f, 300.0f);
+        window.draw(emptyColl);
+    }
+    else
+    {
+        for (auto& el : v1)
+        {
+            if (arr[el].getCondition() == conditions::closed)
+            {
+                closed_card.setPosition(sprite[el].getPosition());
+                window.draw(closed_card);
+            }
+            else if (arr[el].getCondition() == conditions::open)
+            {
+                window.draw(sprite[el]);
+            }
+        }
+    }
+    if (v2.empty())
+    {
+        emptyColl.setPosition(400.0f, 300.0f);
+        window.draw(emptyColl);
+    }
+    else
+    {
+        for (auto& el : v2)
+        {
+            if (arr[el].getCondition() == conditions::closed)
+            {
+                closed_card.setPosition(sprite[el].getPosition());
+                window.draw(closed_card);
+            }
+            else if (arr[el].getCondition() == conditions::open)
+            {
+                window.draw(sprite[el]);
+            }
+        }
+    }
+    if (v3.empty())
+    {
+        emptyColl.setPosition(600.0f, 300.0f);
+        window.draw(emptyColl);
+    }
+    else
+    {
+        for (auto& el : v3)
+        {
+            if (arr[el].getCondition() == conditions::closed)
+            {
+                closed_card.setPosition(sprite[el].getPosition());
+                window.draw(closed_card);
+            }
+            else if (arr[el].getCondition() == conditions::open)
+            {
+                window.draw(sprite[el]);
+            }
+        }
+    }
+    if (v4.empty())
+    {
+        emptyColl.setPosition(800.0f, 300.0f);
+        window.draw(emptyColl);
+    }
+    else
+    {
+        for (auto& el : v4)
+        {
+            if (arr[el].getCondition() == conditions::closed)
+            {
+                closed_card.setPosition(sprite[el].getPosition());
+                window.draw(closed_card);
+            }
+            else if (arr[el].getCondition() == conditions::open)
+            {
+                window.draw(sprite[el]);
+            }
+        }
+    }
+    if (v5.empty())
+    {
+        emptyColl.setPosition(1000.0f, 300.0f);
+        window.draw(emptyColl);
+    }
+    else
+    {
+        for (auto& el : v5)
+        {
+            if (arr[el].getCondition() == conditions::closed)
+            {
+                closed_card.setPosition(sprite[el].getPosition());
+                window.draw(closed_card);
+            }
+            else if (arr[el].getCondition() == conditions::open)
+            {
+                window.draw(sprite[el]);
+            }
+        }
+    }
+    if (v6.empty())
+    {
+        emptyColl.setPosition(1200.0f, 300.0f);
+        window.draw(emptyColl);
+    }
+    else
+    {
+        for (auto& el : v6)
+        {
+            if (arr[el].getCondition() == conditions::closed)
+            {
+                closed_card.setPosition(sprite[el].getPosition());
+                window.draw(closed_card);
+            }
+            else if (arr[el].getCondition() == conditions::open)
+            {
+                window.draw(sprite[el]);
+            }
+        }
+    }
+    if (v7.empty())
+    {
+        emptyColl.setPosition(1400.0f, 300.0f);
+        window.draw(emptyColl);
+    }
+    else
+    {
+        for (auto& el : v7)
+        {
+            if (arr[el].getCondition() == conditions::closed)
+            {
+                closed_card.setPosition(sprite[el].getPosition());
+                window.draw(closed_card);
+            }
+            else if (arr[el].getCondition() == conditions::open)
+            {
+                window.draw(sprite[el]);
+            }
+        }
+    }
+}
+
 void drawing::draw_slots(RenderWindow& window, vector<Card>& arr, vector<Sprite>& sprite, vector<int>& slot_1, vector<int>& slot_2, vector<int>& slot_3, vector<int>& slot_4)
 {
     if (!slot_1.empty())

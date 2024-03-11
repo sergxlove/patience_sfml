@@ -74,6 +74,10 @@ int main()
     back_spr.setTexture(texture_back_image);
     back_spr.setTextureRect(IntRect(0, 0, 1600, 900));
     back_spr.setPosition(0, 0);
+    RectangleShape emptyCollum;
+    emptyCollum.setSize(Vector2f(164.2,230));
+    emptyCollum.setFillColor(Color(95, 155, 138));
+    emptyCollum.setScale(0.8f, 0.8f);
     vector<Card> arrayCard = f.fieldArray();
     vector<Sprite> slot_for_card = f.field_array_for_card(&texture_cards);//массив спрайтов всех карт
     vector<int> cols_v1 = f.field_cols(arrayCard, 1);//первый столбец карт
@@ -326,7 +330,7 @@ int main()
             }
             else
             {
-                d.draw_cols(window, closed_card, arrayCard, arr_sprites, cols_v1, cols_v2, cols_v3, cols_v4, cols_v5, cols_v6, cols_v7);
+                d.draw_cols(window, closed_card, arrayCard, arr_sprites, cols_v1, cols_v2, cols_v3, cols_v4, cols_v5, cols_v6, cols_v7, emptyCollum);
             }
             if (draw_arr_shop && !arr_shop.empty())
             {
