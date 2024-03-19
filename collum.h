@@ -11,12 +11,12 @@ class coll
 public:
 	coll(vector<Card>& arrayCard, int size)
 	{
-		isEmptyCollum = false;
-		emptyCollum.setSize(Vector2f(164.2, 230));
-		emptyCollum.setFillColor(Color(95, 155, 138));
-		emptyCollum.setScale(0.8f, 0.8f);
-		emptyCollum.setPosition(200.0f * size, 300.0f);
-		collum.reserve(size);
+		this->isEmptyCollum = false;
+		this->emptyCollum.setSize(Vector2f(164.2, 230));
+		this->emptyCollum.setFillColor(Color(95, 155, 138));
+		this->emptyCollum.setScale(0.8f, 0.8f);
+		this->emptyCollum.setPosition(200.0f * size, 300.0f);
+		this->collum.reserve(size);
 		int value = 0;
 		auto it = arrayCard.begin();
 		for (int i = 0;i < size;)
@@ -26,30 +26,51 @@ public:
 			advance(it, value);
 			if (it->getUsers() == false)
 			{
-				collum.push_back(value);
+				this->collum.push_back(value);
 				it->setUsers(true);
 				i++;
 			}
 		}
 	}
-	vector<int> getColl()
+	vector<int>& getColl()
 	{
-		return collum;
+		return this->collum;
 	}
 	int top()
 	{
-		return collum[collum.size() - 1];
+		return this->collum[collum.size() - 1];
 	}
-	bool add(int draggingCardIndex, int draggingCardColor, int commonCardIndex, int commonCardColor)
+	int top(int index)
 	{
-		if (draggingCardIndex < commonCardIndex && draggingCardColor != commonCardColor)
+		return this->collum[index];
+	}
+	bool add(int draggingCardIndex, int draggingCardColor, int commonCardIndex, int commonCardColor, int totalIndex)
+	{
+		if (draggingCardIndex + 1 == commonCardIndex && draggingCardColor != commonCardColor)
 		{
+			this->collum.push_back(totalIndex);
 			return true;
 		}
 		else
 		{
 			return false;
 		}
+	}
+	bool getCondition()
+	{
+		return this->isEmptyCollum;
+	}
+	void setCondition(bool isEmptyCollum)
+	{
+		this->isEmptyCollum = isEmptyCollum;
+	}
+	void delLast()
+	{
+		this->collum.erase(this->collum.begin() + (this->collum.size() - 1));
+	}
+	int getSize()
+	{
+		return this->collum.size();
 	}
 private:
 	vector<int> collum;

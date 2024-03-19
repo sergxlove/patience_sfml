@@ -93,7 +93,7 @@ vector<int> fielding::field_array_shop(vector<Card>& check)
         if (it->getUsers() == false)
         {
             result.push_back(count);
-            it->setColor(true);
+            it->setUsers(true);
         }
         count++;
     }
