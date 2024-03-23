@@ -304,8 +304,6 @@ int main()
 							}
 							if (collission)
 							{
-								//return_sprite = false;
-								//c.swaps_card(r.get_ref(cols_v1, cols_v2, cols_v3, cols_v4, cols_v5, cols_v6, cols_v7, current_cols), r.get_ref(cols_v1, cols_v2, cols_v3, cols_v4, cols_v5, cols_v6, cols_v7, future_cols), arrayCard, arr_sprites, future_cols);
 								if (c.swaps_card(r.getRefColl(collV1, collV2, collV3, collV4, collV5, collV6, collV7, current_cols), r.getRefColl(collV1, collV2, collV3, collV4, collV5, collV6, collV7, future_cols), arrayCard, arr_sprites, future_cols, dragging_index, common_draging_index))
 								{
 									return_sprite = false;
