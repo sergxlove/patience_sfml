@@ -85,13 +85,6 @@ int main()
 	emptyCollum.setScale(0.8f, 0.8f);
 	vector<Card> arrayCard = f.fieldArray();
 	vector<Sprite> slot_for_card = f.field_array_for_card(&texture_cards);//массив спрайтов всех карт
-	//vector<int> cols_v1 = f.field_cols(arrayCard, 1);//первый столбец карт
-	//vector<int> cols_v2 = f.field_cols(arrayCard, 2);//второй столбец карт
-	//vector<int> cols_v3 = f.field_cols(arrayCard, 3);//третий столбец карт
-	//vector<int> cols_v4 = f.field_cols(arrayCard, 4);//четвертый столбец карт
-	//vector<int> cols_v5 = f.field_cols(arrayCard, 5);//пятый столбец карт
-	//vector<int> cols_v6 = f.field_cols(arrayCard, 6);//шестой столбец карт 
-	//vector<int> cols_v7 = f.field_cols(arrayCard, 7);//седьмой столбец карт
 	coll collV1(arrayCard, 1);
 	coll collV2(arrayCard, 2);
 	coll collV3(arrayCard, 3);
@@ -105,6 +98,7 @@ int main()
 	slot slot_v4;
 	vector<int> arr_shop = f.field_array_shop(arrayCard);//массив карт в магазине
 	vector<Sprite> arr_sprites = f.field_array_sprite(&texture_cards, arrayCard);//массив для отрисовки карт
+	vector<int> arraCardDragging;
 	int count_arr_shop = 0;
 	bool draw_arr_shop = false;
 	bool first_start = true;
@@ -126,6 +120,7 @@ int main()
 	int future_cols = 0;
 	bool click_card = false;
 	bool click_card_shop = false;
+	bool isOneCard = true;
 	random_shuffle(arr_shop.begin(), arr_shop.end());
 	f.field_conditions(arrayCard, collV1.getColl(), collV2.getColl(), collV3.getColl(), collV4.getColl(), collV5.getColl(), collV6.getColl(), collV7.getColl(), slot_v1.get_slot(), slot_v2.get_slot(), slot_v3.get_slot(), slot_v4.get_slot(), arr_shop);
 	f.field_number_cols(arrayCard, collV1.getColl(), collV2.getColl(), collV3.getColl(), collV4.getColl(), collV5.getColl(), collV6.getColl(), collV7.getColl());
@@ -159,6 +154,7 @@ int main()
 							{
 								draw_arr_shop = true;
 							}
+							isOneCard = true;
 						}
 						else
 						{
@@ -173,6 +169,7 @@ int main()
 								start_x = arr_sprites[dragging_index].getPosition().x;
 								start_y = arr_sprites[dragging_index].getPosition().y;
 								return_sprite = false;
+								isOneCard = true;
 							}
 						}
 						if (draging == false)
@@ -183,16 +180,26 @@ int main()
 								{
 									dragging_index = i;
 									draging = true;
-									dx = Mouse::getPosition(window).x - arr_sprites[i].getPosition().x;
-									dy = Mouse::getPosition(window).y - arr_sprites[i].getPosition().y;
-									start_x = arr_sprites[i].getPosition().x;
-									start_y = arr_sprites[i].getPosition().y;
-									return_sprite = false;
 									current_cols = arrayCard[i].getNumberCols();
-									click_card = true;
-									cout << "x = " << event.mouseButton.x << " y = " << event.mouseButton.y << " i = " << i << endl;
-									cout << "x = " << Mouse::getPosition(window).x << " y = " << Mouse::getPosition(window).y << " i = " << i << endl;
-									cout << "cols = " << current_cols << endl;
+									isOneCard = r.getRefColl(collV1, collV2, collV3, collV4, collV5, collV6, collV7, current_cols).checkQauntityCard(dragging_index);
+									if (isOneCard)
+									{
+										cout << "one card" << endl;
+										dx = Mouse::getPosition(window).x - arr_sprites[i].getPosition().x;
+										dy = Mouse::getPosition(window).y - arr_sprites[i].getPosition().y;
+										start_x = arr_sprites[i].getPosition().x;
+										start_y = arr_sprites[i].getPosition().y;
+										return_sprite = false;
+										click_card = true;
+										cout << "x = " << event.mouseButton.x << " y = " << event.mouseButton.y << " i = " << i << endl;
+										cout << "x = " << Mouse::getPosition(window).x << " y = " << Mouse::getPosition(window).y << " i = " << i << endl;
+										cout << "cols = " << current_cols << endl;
+									}
+									else
+									{
+										cout << "more card" << endl;
+
+									}
 									break;
 								}
 							}
@@ -264,6 +271,12 @@ int main()
 									}
 									else
 									{
+
+										total_step_x = arr_sprites[dragging_index].getPosition().x - start_x;
+										total_step_y = arr_sprites[dragging_index].getPosition().y - start_y;
+										step_x = total_step_x / 10;
+										step_y = total_step_y / 10;
+										count = 0;
 										return_sprite = true;
 									}
 								}

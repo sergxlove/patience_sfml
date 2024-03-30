@@ -60,6 +60,31 @@ public:
 	{
 		return this->isEmptyCollum;
 	}
+	bool checkQauntityCard(int dragging_index)
+	{
+		int quantity = 0;
+		bool isFound = false;
+		for (auto& el : collum)
+		{
+			if (isFound)
+			{
+				quantity++;
+			}
+			if (el == dragging_index)
+			{
+				quantity++;
+				isFound = true;
+			}
+		}
+		if (quantity == 1)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
 	void setCondition(bool isEmptyCollum)
 	{
 		this->isEmptyCollum = isEmptyCollum;
@@ -71,6 +96,22 @@ public:
 	int getSize()
 	{
 		return this->collum.size();
+	}
+	void getArrayDraggingCard(vector<int>& arr, int dragging_index)
+	{
+		bool isCheck = false;
+		arr.clear();
+		for (auto& el : collum)
+		{
+			if (isCheck)
+			{
+				arr.push_back(el);
+			}
+			if (el == dragging_index)
+			{
+				isCheck = true;
+			}
+		}
 	}
 private:
 	vector<int> collum;
